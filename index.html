@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="TikTok UI">
+  <link rel="manifest" href="data:application/json,{}">
+  <title>TikTok UI · N7 MEGA ☁️</title>
+  <style>
+    :root {
+      --bg: #000; --surface: #0a0a0a; --card: #111;
+      --text: #fff; --text2: #888; --accent: #ff0040; --accent2: #00e5ff;
+      --border: #1a1a1a; --green: #22c55e; --orange: #f59e0b; --red: #ff3333;
+    }
+    .theme-light { --bg: #f5f5f5; --surface: #fff; --card: #eee; --text: #111; --text2: #666; --border: #ddd; }
+    .theme-pink { --bg: #1a0010; --surface: #2a0020; --card: #3a0030; --text: #fff; --text2: #faa; --accent: #ff69b4; --accent2: #ff1493; --border: #4a0040; }
+    .theme-blue { --bg: #001020; --surface: #0a1a2a; --card: #1a2a3a; --text: #fff; --text2: #8af; --accent: #4488ff; --accent2: #00aaff; --border: #2a3a4a; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; height: 100vh; overflow: hidden; user-select: none; -webkit-user-select: none; transition: background 0.3s, color 0.3s; }
+
+    #authScreen { position: fixed; inset: 0; background: #000; z-index: 200; display: flex; align-items: center; justify-content: center; }
+    #authScreen.hidden { display: none; }
+    #authBox { background: #111; border-radius: 20px; padding: 30px 25px; width: 90%; max-width: 350px; text-align: center; }
+    #authBox h1 { font-size: 32px; margin-bottom: 5px; }
+    #authBox h1 span { color: var(--accent); }
+    #authBox p { color: #888; margin-bottom: 20px; font-size: 14px; }
+    #authBox input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 12px; border: 1px solid #222; background: #000; color: #fff; font-size: 16px; outline: none; }
+    #authBox button { width: 100%; padding: 14px; margin: 6px 0; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+    #loginBtn { background: var(--accent); color: #fff; }
+    #registerBtn { background: var(--accent2); color: #000; }
+    #authError { color: #ff4444; margin-top: 10px; font-size: 14px; min-height: 20px; }
+
+    #app { height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+    #topBar { height: 50px; background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #topBar span { font-weight: bold; font-size: 18px; }
+    #topBar .top-btns { display: flex; gap: 6px; }
+    #topBar button, #notifBtn { background: none; border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 15px; font-size: 13px; cursor: pointer; position: relative; }
+    #notifBadge { position: absolute; top: -4px; right: -4px; background: var(--accent); color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: none; align-items: center; justify-content: center; }
+
+    #content { flex: 1; position: relative; overflow: hidden; }
+    .page { position: absolute; inset: 0; overflow-y: auto; display: none; }
+    .page.active { display: block; }
+
+    #feedPage { overflow-y: scroll; scroll-snap-type: y mandatory; scroll-snap-stop: always; }
+    .vid { width: 100%; height: calc(100vh - 110px); scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vid video { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .vid .info { position: absolute; bottom: 80px; left: 15px; right: 55px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 12px; }
+    .vid .info .uname { font-weight: bold; font-size: 14px; }
+    .vid .info .title { font-size: 12px; color: #ccc; margin-top: 3px; }
+    .vid .info .hashtags { font-size: 11px; color: #fff; margin-top: 3px; }
+    .vid .info .hashtags span { color: var(--accent2); cursor: pointer; margin-right: 4px; }
+    .vid .btns { position: absolute; right: 10px; bottom: 90px; display: flex; flex-direction: column; gap: 15px; }
+    .vid .btns button { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+    .vid .btns span { font-size: 11px; display: block; text-align: center; }
+    .vid .sound { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .vid .filter-overlay { position: absolute; inset: 0; pointer-events: none; }
+    .vid .comment-panel { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); max-height: 50%; overflow-y: auto; padding: 15px; border-radius: 16px 16px 0 0; display: none; z-index: 10; }
+    .vid .comment-panel.show { display: block; }
+    .comment-item { padding: 8px 0; border-bottom: 1px solid #222; font-size: 13px; }
+    .comment-item b { color: var(--accent2); }
+    .comment-input { display: flex; gap: 6px; margin-top: 8px; }
+    .comment-input input { flex: 1; padding: 8px; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; font-size: 12px; }
+    .comment-input button { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 8px 12px; cursor: pointer; font-size: 12px; }
+
+    #profilePage { padding: 25px 25px 80px 25px; text-align: center; }
+    #avatarImg { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #222; cursor: pointer; }
+    #profilePage h3 { margin-top: 10px; font-size: 20px; }
+    #profileBio { color: var(--text2); font-size: 13px; margin: 5px 0; }
+    #profileLink { color: var(--accent2); font-size: 13px; text-decoration: none; display: block; margin: 3px 0; }
+    #profilePage .st { color: var(--text2); font-size: 13px; margin: 5px 0 15px; }
+    #profilePage button { display: block; width: 90%; max-width: 300px; margin: 6px auto; padding: 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; cursor: pointer; }
+    #profilePage .toggle-btn { background: var(--green); border: none; font-weight: bold; color: #fff; }
+    #profilePage .toggle-btn.private { background: var(--red); }
+    .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--green); font-size: 12px; color: #fff; margin-left: 5px; vertical-align: middle; }
+    .achievement-badge { display: inline-block; padding: 4px 10px; margin: 3px; border-radius: 12px; font-size: 11px; background: var(--card); border: 1px solid var(--border); }
+    .achievement-badge.earned { border-color: #ffd700; background: #2a2000; color: #ffd700; }
+
+    #themeSettings { margin: 10px auto; max-width: 300px; }
+    #themeSettings select { width: 100%; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; }
+    #langSelect { width: 100%; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; margin: 6px auto; max-width: 300px; }
+
+    #adminPage { padding: 15px 15px 90px 15px; }
+    #adminPage .stat { display: inline-block; background: var(--card); padding: 12px 16px; border-radius: 12px; margin: 4px; font-size: 13px; text-align: center; }
+    #adminPage .stat b { display: block; font-size: 20px; color: var(--accent); }
+    #adminPage input, #adminPage textarea, #adminPage select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: #fff; margin: 8px 0; font-size: 14px; outline: none; }
+    #adminPage textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+    #adminPage .row { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--card); border-radius: 10px; margin: 4px 0; font-size: 13px; flex-wrap: wrap; gap: 6px; }
+    #adminPage .row button { padding: 5px 12px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: #fff; font-size: 11px; cursor: pointer; }
+    #adminPage .row .del { background: var(--accent); border-color: var(--accent); }
+    #adminPage .row .ban { background: var(--red); border-color: var(--red); }
+    #adminPage .row .ok { background: var(--green); border-color: var(--green); color: #000; }
+    #adminPage .mega-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; margin: 8px 0; color: #fff; }
+    .broadcast-btn { background: linear-gradient(135deg, #ff0040, #ff6600); }
+    .promo-section { background: var(--card); border-radius: 16px; padding: 16px; margin: 15px 0; border: 2px solid #ffd700; }
+    .promo-section h3 { color: #ffd700; margin: 0 0 10px; }
+
+    #chatPage { padding: 15px 15px 80px 15px; }
+    .chatRow { display: flex; align-items: center; padding: 12px; background: var(--card); border-radius: 12px; margin: 4px 0; cursor: pointer; }
+    .chatAv { width: 40px; height: 40px; border-radius: 50%; background: #222; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; margin: 3px 0; font-size: 13px; }
+    .msg.sent { background: var(--accent); align-self: flex-end; }
+    .msg.recv { background: var(--card); border: 1px solid var(--border); align-self: flex-start; }
+    #chatInput { display: flex; gap: 8px; padding: 10px; background: var(--surface); position: sticky; bottom: 0; }
+    #chatInput input { flex: 1; padding: 10px; border-radius: 18px; border: 1px solid var(--border); background: #000; color: var(--text); }
+    #chatInput button { background: var(--accent); color: #fff; border: none; border-radius: 18px; padding: 10px 18px; cursor: pointer; font-weight: bold; }
+
+    #logPage, #historyPage { padding: 10px 10px 80px 10px; }
+    .log-entry, .history-entry { padding: 8px 12px; background: var(--card); border-left: 4px solid var(--accent); margin: 3px 0; border-radius: 4px; font-size: 12px; font-family: monospace; }
+    .log-entry .ltime { color: var(--text2); margin-right: 8px; }
+
+    #notifPopup { position: fixed; top: 55px; right: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 300px; max-height: 400px; overflow-y: auto; z-index: 150; display: none; padding: 10px; }
+    #notifPopup.show { display: block; }
+    .notif-item { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; cursor: pointer; }
+    .notif-item.unread { border-left: 3px solid var(--accent); }
+
+    #bottomBar { height: 60px; background: var(--surface); display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border); position: absolute; bottom: 0; left: 0; right: 0; z-index: 20; flex-shrink: 0; }
+    #bottomBar .nav { display: flex; flex-direction: column; align-items: center; color: var(--text2); font-size: 11px; cursor: pointer; }
+    #bottomBar .nav.on { color: var(--text); }
+    #bottomBar .nav .ico { font-size: 22px; }
+
+    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 10px 20px; border-radius: 20px; z-index: 99; font-weight: bold; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    #toast.show { opacity: 1; }
+
+    @media (max-width: 400px) { .vid .info { bottom: 100px; } }
+  </style>
+</head>
+<body>
+
+<div id="authScreen">
+  <div id="authBox">
+    <h1>Tik<span>Tok</span> UI</h1>
+    <p>☁️ Облачная версия · N7 MEGA</p>
+    <input id="loginInput" placeholder="Логин">
+    <input id="passInput" type="password" placeholder="Пароль">
+    <button id="loginBtn">🚀 Войти</button>
+    <button id="registerBtn">✨ Создать аккаунт</button>
+    <div id="authError"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div id="topBar">
+    <span>TikTok UI</span>
+    <div class="top-btns">
+      <button id="notifBtn">🔔<span id="notifBadge">0</span></button>
+      <button id="themeBtn">🎨</button>
+      <button id="langSwitchBtn">🌍</button>
+      <button id="logoutBtn">Выйти</button>
+    </div>
+  </div>
+  <div id="notifPopup"></div>
+  <div id="content">
+    <div id="feedPage" class="page active"></div>
+    <div id="historyPage" class="page"></div>
+    <div id="chatPage" class="page"></div>
+    <div id="profilePage" class="page">
+      <img id="avatarImg" src=""><input type="file" id="avatarFile" accept="image/*" hidden>
+      <h3 id="profileName"></h3>
+      <p id="profileBio"></p>
+      <a id="profileLink" href="#" target="_blank"></a>
+      <div id="achievementsContainer"></div>
+      <div class="st" id="profileStats"></div>
+      <select id="langSelect"><option value="ru">🇷🇺 Русский</option><option value="en">🇬🇧 English</option></select>
+      <div id="themeSettings"><select id="themeSelect"><option value="dark">🌙 Тёмная</option><option value="light">☀️ Светлая</option><option value="pink">🌸 Розовая</option><option value="blue">🌊 Синяя</option></select></div>
+      <button id="editBioBtn">📝 Описание</button>
+      <button id="editLinkBtn">🔗 Ссылка</button>
+      <button id="chNickBtn">✏️ Ник</button>
+      <button id="chPassBtn">🔒 Пароль</button>
+      <button id="uploadBtn">📤 Загрузить видео</button>
+      <input type="file" id="videoFile" accept="video/*" hidden>
+      <button id="scheduleUploadBtn">📅 Отложенная публикация</button>
+      <input type="file" id="scheduleFile" accept="video/*" hidden>
+      <button id="visibilityBtn" class="toggle-btn">🌍 Видимость: Для всех</button>
+      <button id="promoCodeBtn">🎁 Активировать промокод</button>
+      <div id="uploadStatus" style="color:var(--text2);margin-top:8px;"></div>
+    </div>
+    <div id="adminPage" class="page"></div>
+    <div id="logPage" class="page"></div>
+  </div>
+  <div id="bottomBar">
+    <div class="nav on" data-p="feedPage"><span class="ico">🏠</span><span class="nav-label">Главная</span></div>
+    <div class="nav" data-p="historyPage"><span class="ico">🕐</span><span class="nav-label">История</span></div>
+    <div class="nav" data-p="chatPage"><span class="ico">💬</span><span class="nav-label">Чаты</span></div>
+    <div class="nav" data-p="profilePage"><span class="ico">👤</span><span class="nav-label">Профиль</span></div>
+    <div class="nav" id="adminNav" data-p="adminPage" style="display:none;"><span class="ico">🛡️</span><span class="nav-label">Админ</span></div>
+    <div class="nav" data-p="logPage"><span class="ico">📋</span><span class="nav-label">Логи</span></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ========== SUPABASE ==========
+const URL = 'https://gtyjjzmvdhglxfjrwejh.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0eWpqem12ZGhnbHhmanJ3ZWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNDc1NjMsImV4cCI6MjEwMTYyMzU2M30.8KOimAzsQbj5xPukQswdW05dvW5sat3xvyfxB44_J5Y';
+
+// ========== ГЛОБАЛЬНЫЕ ==========
+let ME = '', ADMIN = false, SOUND = false, MY_VISIBILITY = 'all';
+const LOGS = [], HISTORY = [], NOTIFICATIONS = [];
+let UPLOAD_COUNT = 0, UPLOAD_RESET = 0, PROMO_LIMIT = 0;
+let THEME = 'dark', LANG = 'ru';
+const BANNED_WORDS = ['мат', 'хуй', 'пизда', 'ебал', 'сука', 'блядь', 'fuck', 'shit', 'ass', 'damn'];
+const ACHIEVEMENTS = {
+  first_video: '🎬 Первое видео',
+  ten_videos: '📹 10 видео',
+  fifty_likes: '❤️ 50 лайков',
+  hundred_likes: '💯 100 лайков',
+  first_follower: '👥 Первый подписчик',
+  verified_creator: '✅ Верификация',
+  promo_master: '🎁 Активирован промокод'
+};
+let MY_ACHIEVEMENTS = [];
+
+const LANG_STRINGS = {
+  ru: { home: 'Главная', history: 'История', chats: 'Чаты', profile: 'Профиль', admin: 'Админ', logs: 'Логи', logout: 'Выйти', notifs: 'Уведомления', no_videos: '📹 Нет видео', load_error: 'Ошибка загрузки', upload_ok: '✅ Готово!', upload_limit: '⚠️ Лимит 5/час', promo_ok: '✅ Промокод активирован!', promo_fail: '❌ Недействительный промокод', visibility_all: '🌍 Видимость: Для всех', visibility_private: '🔒 Видимость: Только я', comment_placeholder: 'Комментарий...', msg_placeholder: 'Сообщение...', send: 'Отправить', like: '❤️', del: '🗑️', back: '← Назад' },
+  en: { home: 'Home', history: 'History', chats: 'Chats', profile: 'Profile', admin: 'Admin', logs: 'Logs', logout: 'Logout', notifs: 'Notifications', no_videos: '📹 No videos', load_error: 'Load error', upload_ok: '✅ Done!', upload_limit: '⚠️ Limit 5/hr', promo_ok: '✅ Promo activated!', promo_fail: '❌ Invalid promo', visibility_all: '🌍 Visible: All', visibility_private: '🔒 Visible: Only me', comment_placeholder: 'Comment...', msg_placeholder: 'Message...', send: 'Send', like: '❤️', del: '🗑️', back: '← Back' }
+};
+function LS(k) { return LANG_STRINGS[LANG][k] || k; }
+
+// ========== ФУНКЦИИ ==========
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function addLog(msg) {
+  const now = new Date(); const time = now.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  LOGS.push({ time, msg }); if (LOGS.length > 200) LOGS.shift(); renderLogs();
+}
+function renderLogs() { const lp = document.getElementById('logPage'); if (!lp.classList.contains('active')) return; lp.innerHTML = LOGS.map(l => `<div class="log-entry"><span class="ltime">${l.time}</span>${l.msg}</div>`).join(''); lp.scrollTop = lp.scrollHeight; }
+
+function addNotif(user, text, type) {
+  NOTIFICATIONS.unshift({ user, text, type, time: Date.now(), read: false });
+  if (NOTIFICATIONS.length > 50) NOTIFICATIONS.pop();
+  updateNotifBadge();
+}
+function updateNotifBadge() { const b = document.getElementById('notifBadge'); const c = NOTIFICATIONS.filter(n => !n.read).length; if (c > 0) { b.style.display = 'flex'; b.textContent = c; } else { b.style.display = 'none'; } }
+
+function addHistory(vid) {
+  HISTORY.unshift(vid); if (HISTORY.length > 30) HISTORY.pop();
+  renderHistory();
+}
+function renderHistory() { const hp = document.getElementById('historyPage'); if (!hp.classList.contains('active')) return; hp.innerHTML = HISTORY.length ? HISTORY.map(v => `<div class="history-entry" onclick="scrollToVideo('${v.url}')">🎬 ${v.name||'Без названия'} · @${v.user_id}</div>`).join('') : '<div style="color:var(--text2);padding:20px;">История пуста</div>'; }
+
+function hashPassword(p) { let h = 0; for (let i = 0; i < p.length; i++) { const c = p.charCodeAt(i); h = ((h << 5) - h) + c; h |= 0; } return 'h_' + Math.abs(h).toString(16); }
+
+function moderateText(text) { if (!text) return { ok: true, text }; let t = text.toLowerCase(); for (const w of BANNED_WORDS) { if (t.includes(w)) return { ok: false, word: w }; } return { ok: true, text }; }
+
+async function api(path, method = 'GET', body = null) {
+  const h = { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY };
+  const o = { method, headers: h }; if (body) o.body = JSON.stringify(body);
+  const r = await fetch(URL + '/rest/v1/' + path, o); const t = await r.text();
+  if (!r.ok) { console.error('❌', method, path, t); throw new Error(t); }
+  return t ? JSON.parse(t) : [];
+}
+
+async function setupStorage() { try { await fetch(URL+'/storage/v1/bucket',{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},body:JSON.stringify({name:'tiktok-videos',public:true})}); } catch(e) {} }
+
+// ========== ТЕМЫ ==========
+function applyTheme(th) { document.body.className = th === 'light' ? 'theme-light' : th === 'pink' ? 'theme-pink' : th === 'blue' ? 'theme-blue' : ''; THEME = th; localStorage.setItem('tiktok_theme', th); }
+document.getElementById('themeSelect').onchange = e => applyTheme(e.target.value);
+document.getElementById('themeBtn').onclick = () => { const s = document.getElementById('themeSelect'); s.value = s.value === 'dark' ? 'light' : s.value === 'light' ? 'pink' : s.value === 'pink' ? 'blue' : 'dark'; applyTheme(s.value); };
+
+// ========== ЯЗЫК ==========
+function applyLang(l) { LANG = l; localStorage.setItem('tiktok_lang', l); document.querySelectorAll('.nav-label').forEach((el, i) => { const keys = ['home','history','chats','profile','admin','logs']; el.textContent = LS(keys[i]||''); }); document.getElementById('logoutBtn').textContent = LS('logout'); }
+document.getElementById('langSelect').onchange = e => applyLang(e.target.value);
+document.getElementById('langSwitchBtn').onclick = () => { const s = document.getElementById('langSelect'); s.value = s.value === 'ru' ? 'en' : 'ru'; applyLang(s.value); };
+
+// ========== НАВИГАЦИЯ ==========
+document.querySelectorAll('#bottomBar .nav').forEach(n => n.onclick = () => {
+  document.querySelectorAll('#bottomBar .nav').forEach(x => x.classList.remove('on')); n.classList.add('on');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const id = n.dataset.p; document.getElementById(id).classList.add('active');
+  if (id === 'feedPage') loadFeed(); if (id === 'historyPage') renderHistory();
+  if (id === 'chatPage') loadChats(); if (id === 'profilePage') loadProfile();
+  if (id === 'adminPage') loadAdmin(); if (id === 'logPage') renderLogs();
+});
+
+// УВЕДОМЛЕНИЯ
+document.getElementById('notifBtn').onclick = () => { const p = document.getElementById('notifPopup'); p.classList.toggle('show'); if (p.classList.contains('show')) renderNotifs(); };
+function renderNotifs() { const p = document.getElementById('notifPopup'); p.innerHTML = NOTIFICATIONS.length ? NOTIFICATIONS.map(n => `<div class="notif-item ${n.read?'':'unread'}" onclick="this.classList.remove('unread');NOTIFICATIONS.find(x=>x.time===${n.time}).read=true;updateNotifBadge();">${n.text}<br><small style="color:var(--text2);">${new Date(n.time).toLocaleTimeString()}</small></div>`).join('') : '<div style="padding:10px;color:var(--text2);">Нет уведомлений</div>'; }
+
+// ========== АДМИН ==========
+async function ensureAdmin() {
+  try { const u = await api('users?login=eq.Grustish'); if (!u.length) { await api('users','POST',{login:'Grustish',password:hashPassword('Grusti01'),nickname:'Grustish Admin',avatar:'',role:'admin',verified:true,banned:false,ban_reason:'',ban_until:0,warnings:'[]',visibility:'all',bio:'',link:'',achievements:'[]',coins:0,upload_count:0,upload_reset:0,promo_limit:0,created:new Date().toISOString()}); addLog('👑 Админ создан'); } else if (!u[0].verified || u[0].role!=='admin') { await api('users?login=eq.Grustish','PATCH',{role:'admin',verified:true}); } } catch(e) {}
+}
+
+// ========== ВХОД / РЕГИСТРАЦИЯ ==========
+document.getElementById('loginBtn').onclick = async () => {
+  const l = document.getElementById('loginInput').value.trim(), p = document.getElementById('passInput').value.trim();
+  if (!l||!p) return document.getElementById('authError').textContent = 'Заполните поля';
+  try { const u = await api('users?login=eq.'+encodeURIComponent(l)); if(!u.length) return document.getElementById('authError').textContent='Не найден'; if(u[0].banned) return document.getElementById('authError').textContent='🚫 Забанен'; if(u[0].password!==hashPassword(p)) return document.getElementById('authError').textContent='Неверный пароль'; enter(u[0]); } catch(e) { document.getElementById('authError').textContent='Ошибка'; }
+};
+document.getElementById('registerBtn').onclick = async () => {
+  const l = document.getElementById('loginInput').value.trim(), p = document.getElementById('passInput').value.trim();
+  if (!l||!p) return document.getElementById('authError').textContent='Заполните'; if (l.length<2) return document.getElementById('authError').textContent='Логин короткий'; if (p.length<3) return document.getElementById('authError').textContent='Пароль короткий';
+  const mod = moderateText(l); if (!mod.ok) return document.getElementById('authError').textContent='🚫 Запрещённое слово: '+mod.word;
+  try { const exist = await api('users?login=eq.'+encodeURIComponent(l)); if(exist.length) return document.getElementById('authError').textContent='Занят';
+    await api('users','POST',{login:l,password:hashPassword(p),nickname:l,avatar:'',role:'user',verified:false,banned:false,ban_reason:'',ban_until:0,warnings:'[]',visibility:'all',bio:'',link:'',achievements:'[]',coins:0,upload_count:0,upload_reset:0,promo_limit:0,created:new Date().toISOString()});
+    addLog('✅ Регистрация: @'+l); toast('✅ Создан!'); enter({login:l,role:'user',verified:false,warnings:[],visibility:'all',bio:'',link:'',achievements:[],coins:0,upload_count:0,upload_reset:0,promo_limit:0});
+  } catch(e) { document.getElementById('authError').textContent='Ошибка'; }
+};
+
+function enter(u) {
+  ME = u.login; ADMIN = u.role==='admin'; MY_VISIBILITY = u.visibility||'all';
+  UPLOAD_COUNT = u.upload_count||0; UPLOAD_RESET = u.upload_reset||0; PROMO_LIMIT = u.promo_limit||0;
+  MY_ACHIEVEMENTS = typeof u.achievements==='string'?JSON.parse(u.achievements):(u.achievements||[]);
+  if (Date.now() > UPLOAD_RESET) { UPLOAD_COUNT = 0; UPLOAD_RESET = Date.now() + 3600000; api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{upload_count:0,upload_reset:UPLOAD_RESET}); }
+  localStorage.setItem('tiktok_user',ME); document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('adminNav').style.display = ADMIN?'flex':'none';
+  THEME = localStorage.getItem('tiktok_theme')||'dark'; LANG = localStorage.getItem('tiktok_lang')||'ru';
+  document.getElementById('themeSelect').value = THEME; document.getElementById('langSelect').value = LANG;
+  applyTheme(THEME); applyLang(LANG);
+  addLog('🔑 Вход: @'+ME+(ADMIN?' [АДМИН]':'')); loadFeed(); loadProfile();
+  toast('👋 @'+ME+'!');
+}
+
+document.getElementById('logoutBtn').onclick = () => { addLog('🚪 Выход: @'+ME); localStorage.removeItem('tiktok_user'); location.reload(); };
+
+// ========== ЗАГРУЗКА ЛЕНТЫ (с хештегами, фильтрами, анонимностью, историей) ==========
+async function loadFeed(filter = 'all', hashtag = '') {
+  const fp = document.getElementById('feedPage'); fp.innerHTML = '<div style="text-align:center;padding:40px;">Загрузка...</div>';
+  try {
+    let vids = await api('videos?select=*');
+    if (hashtag) vids = vids.filter(v => (v.hashtags||'').toLowerCase().includes(hashtag.toLowerCase()));
+    if (filter === 'following') { const f = await api('follows?follower=eq.'+encodeURIComponent(ME)); const fu = new Set(f.map(x=>x.following)); vids = vids.filter(v => v.user_id===ME || fu.has(v.user_id)); }
+    if (filter === 'subscriptions') { const f = await api('follows?follower=eq.'+encodeURIComponent(ME)); const fu = new Set(f.map(x=>x.following)); vids = vids.filter(v => fu.has(v.user_id)); }
+    vids = vids.filter(v => v.visibility==='all' || v.user_id===ME);
+    if (!vids.length) { fp.innerHTML = '<div style="text-align:center;padding:40px;">📹 Нет видео</div>'; return; }
+    fp.innerHTML = ''; vids.sort(() => Math.random()-0.5);
+    vids.forEach(v => {
+      const d = document.createElement('div'); d.className = 'vid';
+      const canDel = (v.user_id===ME) || ADMIN;
+      const ht = (v.hashtags||'').split(' ').filter(t=>t.startsWith('#')).map(t=>`<span onclick="event.stopPropagation();loadFeed('all','${t.replace(/#/g,'')}')">${t}</span>`).join(' ');
+      const filterClass = v.filter||'';
+      d.innerHTML = `<video src="${v.url}" loop playsinline muted preload="auto"></video>
+        ${filterClass?`<div class="filter-overlay" style="filter:${filterClass};"></div>`:''}
+        <div class="sound">🔇</div>
+        <div class="info"><div class="uname">@${v.user_id} ${v.pinned?'📌':''}</div><div class="title">${v.name||''} ${v.visibility==='private'?'🔒':''}</div><div class="hashtags">${ht}</div></div>
+        <div class="btns">
+          <button class="lk">❤️<span>${v.likes||0}</span></button>
+          <button class="cmt">💬<span>${v.comments||0}</span></button>
+          <button class="rpt">🔗</button>
+          <button class="dld">📥</button>
+          ${canDel?`<button class="dl">🗑️</button>`:''}
+          <button class="rprt">🚩</button>
+        </div>
+        <div class="comment-panel" id="comments-${v.id}">
+          <div class="comment-list" id="clist-${v.id}"></div>
+          <div class="comment-input"><input id="cinput-${v.id}" placeholder="${LS('comment_placeholder')}"><button id="csend-${v.id}">${LS('send')}</button></div>
+        </div>`;
+      const vid = d.querySelector('video'), snd = d.querySelector('.sound');
+      new IntersectionObserver(([e]) => { if(e.isIntersecting){vid.muted=!SOUND;snd.textContent=SOUND?'🔊':'🔇';vid.play().catch(()=>{});addHistory(v);}else{vid.muted=true;snd.textContent='🔇';vid.pause();} },{threshold:0.7}).observe(d);
+      snd.onclick = e => { e.stopPropagation(); SOUND=!SOUND; vid.muted=!SOUND; snd.textContent=SOUND?'🔊':'🔇'; if(SOUND)vid.play().catch(()=>{}); };
+      d.querySelector('.lk').onclick = async e => { e.stopPropagation(); const nl = (v.likes||0)+1; d.querySelector('.lk span').textContent=nl; await api('videos?id=eq.'+v.id,'PATCH',{likes:nl}); addNotif(ME,'❤️ Лайк от @'+ME+' на видео #'+v.id,'like'); checkAchievements(); };
+      d.querySelector('.cmt').onclick = async e => { e.stopPropagation(); const cp = document.getElementById('comments-'+v.id); cp.classList.toggle('show'); if(cp.classList.contains('show')) loadComments(v.id); };
+      d.querySelector('.rpt').onclick = e => { e.stopPropagation(); navigator.clipboard.writeText(v.url); toast('🔗 Ссылка скопирована!'); };
+      d.querySelector('.dld').onclick = e => { e.stopPropagation(); const a = document.createElement('a'); a.href = v.url; a.download = v.name||'video.mp4'; a.click(); };
+      d.querySelector('.rprt')?.onclick = async e => { e.stopPropagation(); await api('reports','POST',{video_id:v.id,reporter:ME,reason:'Жалоба пользователя',created:new Date().toISOString()}); toast('🚩 Жалоба отправлена'); addLog('🚩 Жалоба на видео #'+v.id); };
+      const dl = d.querySelector('.dl'); if(dl) dl.onclick = async e => { e.stopPropagation(); if(!confirm('Удалить?'))return; await api('videos?id=eq.'+v.id,'DELETE'); addLog('🗑️ Удалено #'+v.id); toast('🗑️ Удалено'); loadFeed(); };
+      fp.appendChild(d);
+    });
+  } catch(e) { fp.innerHTML = '<div style="text-align:center;padding:40px;">Ошибка</div>'; }
+}
+
+async function loadComments(vidId) {
+  const list = document.getElementById('clist-'+vidId); list.innerHTML = 'Загрузка...';
+  const cmts = await api('comments?video_id=eq.'+vidId+'&order=created.asc');
+  list.innerHTML = cmts.map(c => `<div class="comment-item"><b>@${c.user_id}</b> ${c.text} <span style="color:var(--text2);font-size:10px;">${new Date(c.created).toLocaleDateString()}</span></div>`).join('');
+  document.getElementById('csend-'+vidId).onclick = async () => {
+    const t = document.getElementById('cinput-'+vidId).value.trim(); if(!t)return;
+    const mod = moderateText(t); if(!mod.ok) return toast('🚫 Запрещённое слово');
+    await api('comments','POST',{video_id:vidId,user_id:ME,text:t,created:new Date().toISOString()});
+    await api('videos?id=eq.'+vidId,'PATCH',{comments:(await api('comments?video_id=eq.'+vidId)).length});
+    document.getElementById('cinput-'+vidId).value = ''; loadComments(vidId); addNotif(ME,'💬 Комментарий к видео #'+vidId,'comment');
+  };
+}
+
+// ========== ПРОФИЛЬ ==========
+async function loadProfile() {
+  const u = await api('users?login=eq.'+encodeURIComponent(ME)); if(!u.length)return; const user = u[0];
+  MY_VISIBILITY=user.visibility||'all'; UPLOAD_COUNT=user.upload_count||0; UPLOAD_RESET=user.upload_reset||0; PROMO_LIMIT=user.promo_limit||0;
+  MY_ACHIEVEMENTS=typeof user.achievements==='string'?JSON.parse(user.achievements):(user.achievements||[]);
+  document.getElementById('avatarImg').src=user.avatar||'';
+  let nm='@'+ME; if(user.verified)nm+=' <span class="verified-badge">✓</span>';
+  const w=typeof user.warnings==='string'?JSON.parse(user.warnings):(user.warnings||[]); if(w.length)nm+=' <span style="background:var(--orange);color:#000;border-radius:8px;padding:1px 6px;font-size:11px;">⚠'+w.length+'</span>';
+  document.getElementById('profileName').innerHTML=nm;
+  document.getElementById('profileBio').textContent=user.bio||'';
+  const linkEl=document.getElementById('profileLink'); if(user.link){linkEl.href=user.link;linkEl.textContent=user.link;linkEl.style.display='block';}else{linkEl.style.display='none';}
+  const ach=document.getElementById('achievementsContainer');
+  ach.innerHTML=Object.entries(ACHIEVEMENTS).map(([k,v])=>`<span class="achievement-badge ${MY_ACHIEVEMENTS.includes(k)?'earned':''}">${MY_ACHIEVEMENTS.includes(k)?'⭐':''} ${v}</span>`).join('');
+  const vids=await api('videos?select=*'); const mv=vids.filter(v=>v.user_id===ME);
+  const flr=await api('follows?following=eq.'+encodeURIComponent(ME)); const flg=await api('follows?follower=eq.'+encodeURIComponent(ME));
+  document.getElementById('profileStats').textContent='📹 '+mv.length+' · 👥 '+flr.length+' · 🔔 '+flg.length+' · 🪙 '+user.coins+' коинов';
+  const vb=document.getElementById('visibilityBtn'); vb.textContent=MY_VISIBILITY==='private'?LS('visibility_private'):LS('visibility_all'); vb.className='toggle-btn'+(MY_VISIBILITY==='private'?' private':'');
+  ADMIN=user.role==='admin'; document.getElementById('adminNav').style.display=ADMIN?'flex':'none';
+}
+
+document.getElementById('visibilityBtn').onclick=async()=>{const nv=MY_VISIBILITY==='all'?'private':'all';await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{visibility:nv});const mv=await api('videos?user_id=eq.'+encodeURIComponent(ME));for(const v of mv)await api('videos?id=eq.'+v.id,'PATCH',{visibility:nv});MY_VISIBILITY=nv;addLog(nv==='all'?'🌍 Открыто':'🔒 Скрыто');loadProfile();loadFeed();};
+document.getElementById('editBioBtn').onclick=async()=>{const b=prompt('Описание:');if(b!==null){const mod=moderateText(b);if(!mod.ok)return toast('🚫 Запрещённое слово');await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{bio:b});loadProfile();}};
+document.getElementById('editLinkBtn').onclick=async()=>{const l=prompt('Ссылка:');if(l!==null){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{link:l});loadProfile();}};
+document.getElementById('avatarImg').onclick=()=>document.getElementById('avatarFile').click();
+document.getElementById('avatarFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{avatar:ev.target.result});document.getElementById('avatarImg').src=ev.target.result;addLog('🖼️ Аватар');};r.readAsDataURL(f);};
+
+// ЗАГРУЗКА ВИДЕО (с лимитом 5/час)
+document.getElementById('uploadBtn').onclick=()=>document.getElementById('videoFile').click();
+document.getElementById('videoFile').onchange=async e=>{ await uploadVideo(e.target.files[0], false); };
+document.getElementById('scheduleUploadBtn').onclick=()=>document.getElementById('scheduleFile').click();
+document.getElementById('scheduleFile').onchange=async e=>{ const dt=prompt('Дата и время (ГГГГ-ММ-ДД ЧЧ:ММ):',new Date(Date.now()+3600000).toLocaleString('sv').replace(' ','T').slice(0,16)); if(!dt)return; await uploadVideo(e.target.files[0], new Date(dt).toISOString()); };
+
+async function uploadVideo(file, scheduleTime) {
+  if (!file) return;
+  const limit = PROMO_LIMIT > 0 ? PROMO_LIMIT : 5;
+  if (UPLOAD_COUNT >= limit) return document.getElementById('uploadStatus').textContent = LS('upload_limit') + ' (' + UPLOAD_COUNT + '/' + limit + ')';
+  document.getElementById('uploadStatus').textContent = '⏳ Загрузка...';
+  try {
+    const fn = Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9.]/g,'_');
+    const ur = await fetch(URL+'/storage/v1/object/tiktok-videos/'+fn,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':file.type||'video/mp4','x-upsert':'true'},body:file});
+    if (!ur.ok) throw new Error('Storage');
+    const vurl = URL+'/storage/v1/object/public/tiktok-videos/'+fn;
+    const hashtags = prompt('Хештеги (через пробел, например: #смешное #кот):','')||'';
+    const filter = prompt('Фильтр (оставь пусто или: grayscale, sepia, blur, none):','none')||'none';
+    const pin = confirm('Закрепить видео в профиле?');
+    await api('videos','POST',{
+      user_id:ME,name:file.name,url:vurl,duration:0,likes:0,views:0,comments:0,
+      visibility:MY_VISIBILITY,hashtags,pinned:pin,filter:filter==='none'?'':filter,
+      scheduled:scheduleTime||null,created:new Date().toISOString()
+    });
+    UPLOAD_COUNT++; await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{upload_count:UPLOAD_COUNT,upload_reset:UPLOAD_RESET||Date.now()+3600000});
+    document.getElementById('uploadStatus').textContent = LS('upload_ok');
+    addLog('📤 Загружено: '+file.name+(scheduleTime?' (отложено)':''));
+    toast('📤 Загружено! ('+UPLOAD_COUNT+'/'+limit+')');
+    document.getElementById('videoFile').value=''; document.getElementById('scheduleFile').value='';
+    loadFeed(); loadProfile(); checkAchievements();
+    setTimeout(()=>document.getElementById('uploadStatus').textContent='',3000);
+  } catch(er) { document.getElementById('uploadStatus').textContent='❌ Ошибка'; }
+}
+
+// ПРОМОКОДЫ
+document.getElementById('promoCodeBtn').onclick=async()=>{
+  const code=prompt('Введите промокод:',''); if(!code)return;
+  const promos=await api('promocodes?code=eq.'+encodeURIComponent(code));
+  if(!promos.length || promos[0].used>=promos[0].max_uses) return toast(LS('promo_fail'));
+  await api('promocodes?id=eq.'+promos[0].id,'PATCH',{used:promos[0].used+1});
+  PROMO_LIMIT=promos[0].extra_uploads||0; UPLOAD_COUNT=0;
+  if(promos[0].coins) await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{coins:(await api('users?login=eq.'+encodeURIComponent(ME)))[0].coins+promos[0].coins,promo_limit:PROMO_LIMIT,upload_count:0});
+  else await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{promo_limit:PROMO_LIMIT,upload_count:0});
+  if(!MY_ACHIEVEMENTS.includes('promo_master')){MY_ACHIEVEMENTS.push('promo_master');await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{achievements:JSON.stringify(MY_ACHIEVEMENTS)});}
+  addLog('🎁 Промокод: '+code); toast(LS('promo_ok')); loadProfile(); loadFeed();
+};
+
+document.getElementById('chNickBtn').onclick=async()=>{const u=await api('users?login=eq.'+encodeURIComponent(ME));const nn=prompt('Новый ник:',u[0]?.nickname||ME);if(nn&&nn.trim()){const mod=moderateText(nn);if(!mod.ok)return toast('🚫 Запрещённое слово');await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{nickname:nn.trim()});addLog('✏️ Ник');toast('✏️ Готово');loadProfile();}};
+document.getElementById('chPassBtn').onclick=async()=>{const u=await api('users?login=eq.'+encodeURIComponent(ME));const op=prompt('Старый пароль:');if(u[0]?.password!==hashPassword(op))return toast('❌ Неверно');const np=prompt('Новый пароль:');if(np&&np.length>=3){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{password:hashPassword(np)});addLog('🔒 Пароль');toast('🔒 Готово');}};
+
+// ДОСТИЖЕНИЯ
+async function checkAchievements() {
+  const u = await api('users?login=eq.'+encodeURIComponent(ME)); if(!u.length)return;
+  const vids = await api('videos?user_id=eq.'+encodeURIComponent(ME));
+  const likes = vids.reduce((s,v)=>s+(v.likes||0),0);
+  const flr = await api('follows?follower=eq.'+encodeURIComponent(ME));
+  let ach = typeof u[0].achievements==='string'?JSON.parse(u[0].achievements):(u[0].achievements||[]);
+  let changed = false;
+  if(vids.length>=1 && !ach.includes('first_video')){ach.push('first_video');changed=true;}
+  if(vids.length>=10 && !ach.includes('ten_videos')){ach.push('ten_videos');changed=true;}
+  if(likes>=50 && !ach.includes('fifty_likes')){ach.push('fifty_likes');changed=true;}
+  if(likes>=100 && !ach.includes('hundred_likes')){ach.push('hundred_likes');changed=true;}
+  if(flr.length>=1 && !ach.includes('first_follower')){ach.push('first_follower');changed=true;}
+  if(u[0].verified && !ach.includes('verified_creator')){ach.push('verified_creator');changed=true;}
+  if(changed){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{achievements:JSON.stringify(ach)});MY_ACHIEVEMENTS=ach;toast('🏆 Новое достижение!');loadProfile();}
+}
+
+// ЧАТ
+async function loadChats(){const cp=document.getElementById('chatPage');cp.innerHTML='<div style="text-align:center;padding:30px;">Загрузка...</div>';try{const ms=await api('messages?or=(from_user.eq.'+encodeURIComponent(ME)+',to_user.eq.'+encodeURIComponent(ME)+')');const set=new Set();ms.forEach(m=>{if(m.from_user!==ME)set.add(m.from_user);if(m.to_user!==ME)set.add(m.to_user);});const chats=[...set];if(!chats.length){cp.innerHTML='<div style="text-align:center;padding:30px;">💬 Нет сообщений</div>';return;}cp.innerHTML='';for(const c of chats){const u=await api('users?login=eq.'+encodeURIComponent(c));if(!u.length)continue;const d=document.createElement('div');d.className='chatRow';d.innerHTML=`<div class="chatAv">${(u[0].nickname||c)[0].toUpperCase()}</div><div><b>@${c}</b></div>`;d.onclick=()=>openChat(c);cp.appendChild(d);}}catch(e){cp.innerHTML='<div>Ошибка</div>';}}
+async function openChat(wu){const cp=document.getElementById('chatPage');cp.innerHTML=`<button onclick="loadChats()" style="background:none;border:none;color:var(--accent);cursor:pointer;margin-bottom:10px;">← Назад</button><div id="msgBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;"></div><div id="chatInput"><input id="msgInput" placeholder="Сообщение..."><button id="sendMsg">Отправить</button></div>`;const box=document.getElementById('msgBox');const ms=await api('messages?or=(from_user.eq.'+ME+',to_user.eq.'+ME+')&or=(from_user.eq.'+wu+',to_user.eq.'+wu+')&order=created.asc');ms.forEach(m=>{const d=document.createElement('div');d.className='msg '+(m.from_user===ME?'sent':'recv');d.textContent=m.text;box.appendChild(d);});box.scrollTop=box.scrollHeight;document.getElementById('sendMsg').onclick=async()=>{const t=document.getElementById('msgInput').value.trim();if(!t)return;const mod=moderateText(t);if(!mod.ok)return toast('🚫 Запрещённое слово');await api('messages','POST',{from_user:ME,to_user:wu,text:t,created:new Date().toISOString()});const d=document.createElement('div');d.className='msg sent';d.textContent=t;box.appendChild(d);document.getElementById('msgInput').value='';box.scrollTop=box.scrollHeight;};}
+
+// АДМИН-ПАНЕЛЬ (с промокодами, жалобами)
+async function loadAdmin(){const ap=document.getElementById('adminPage');if(!ADMIN){ap.innerHTML='<div style="padding:30px;text-align:center;">⛔ Нет доступа</div>';return;}ap.innerHTML='<div style="text-align:center;padding:30px;">Загрузка...</div>';try{const users=await api('users?select=*');const vids=await api('videos?select=*');const promos=await api('promocodes?select=*');const reports=await api('reports?select=*');const bc=users.filter(u=>u.banned).length;const vc=users.filter(u=>u.verified).length;ap.innerHTML=`<div><span class="stat"><b>${users.length}</b>Польз.</span><span class="stat"><b>${vids.length}</b>Видео</span><span class="stat"><b>${bc}</b>Банов</span><span class="stat"><b>${vc}</b>Вериф.</span><span class="stat"><b>${reports.length}</b>Жалоб</span></div>
+  <div style="background:var(--card);border-radius:16px;padding:16px;margin:15px 0;border:2px solid #ffd700;">
+    <h3>🎁 Создать промокод</h3><input id="promoCode" placeholder="Код (например: FREE10)"><input id="promoUploads" type="number" placeholder="Доп. загрузок" value="10"><input id="promoCoins" type="number" placeholder="Монет" value="0"><input id="promoMax" type="number" placeholder="Макс. активаций" value="100"><button class="mega-btn broadcast-btn" id="createPromoBtn">Создать промокод</button>
+    <h4>Существующие промокоды:</h4><div id="promoList">${promos.map(p=>`<div class="row"><span>🎁 <b>${p.code}</b> +${p.extra_uploads||0} загрузок · 🪙${p.coins||0} · ${p.used}/${p.max_uses}</span><button class="del" data-pid="${p.id}">🗑</button></div>`).join('')}</div>
+  </div>
+  <div style="background:var(--card);border-radius:16px;padding:16px;margin:15px 0;border:2px solid var(--accent);"><h3>📢 Рассылка</h3><textarea id="broadcastMsg" placeholder="Текст..."></textarea><button class="mega-btn broadcast-btn" id="broadcastBtn">📢 Отправить всем (${users.length})</button></div>
+  <h4>🚩 Жалобы (${reports.length})</h4><div id="reportList">${reports.map(r=>`<div class="row"><span>🚩 Видео #${r.video_id} от @${r.reporter} — ${r.reason}</span><button class="del" data-rid="${r.id}">Игнор</button></div>`).join('')}</div>
+  <input id="aSearch" placeholder="🔍 Поиск..." oninput="window._as()"><h4>👥 Пользователи</h4><div id="aUsers"></div><h4>🎬 Видео</h4><div id="aVideos"></div><div style="height:20px;"></div>`;window._au=users;window._av=vids;renderAUsers(users);renderAVideos(vids);
+  document.getElementById('createPromoBtn').onclick=async()=>{const c=document.getElementById('promoCode').value.trim();const u=parseInt(document.getElementById('promoUploads').value)||0;const m=parseInt(document.getElementById('promoCoins').value)||0;const mx=parseInt(document.getElementById('promoMax').value)||100;if(!c)return toast('Введите код!');await api('promocodes','POST',{code:c,extra_uploads:u,coins:m,max_uses:mx,used:0,created:new Date().toISOString()});addLog('🎁 Промокод создан: '+c);toast('✅ Создан!');loadAdmin();};
+  document.getElementById('broadcastBtn').onclick=async()=>{const msg=document.getElementById('broadcastMsg').value.trim();if(!msg)return toast('Введите текст!');for(const u of users)await api('messages','POST',{from_user:'Grustish',to_user:u.login,text:'📢 '+msg,created:new Date().toISOString()});addLog('📢 Рассылка: '+msg);toast('📢 Отправлено!');};
+  document.querySelectorAll('#promoList .del').forEach(b=>b.onclick=async()=>{await api('promocodes?id=eq.'+b.dataset.pid,'DELETE');loadAdmin();});
+  document.querySelectorAll('#reportList .del').forEach(b=>b.onclick=async()=>{await api('reports?id=eq.'+b.dataset.rid,'DELETE');loadAdmin();});
+}catch(e){ap.innerHTML='<div>Ошибка</div>';}}
+
+window._as=()=>{const q=(document.getElementById('aSearch')?.value||'').toLowerCase();renderAUsers(window._au.filter(u=>u.login.toLowerCase().includes(q)));};
+function renderAUsers(users){const el=document.getElementById('aUsers');if(!el)return;el.innerHTML=users.map(u=>{const w=typeof u.warnings==='string'?JSON.parse(u.warnings):(u.warnings||[]);let b='';if(u.verified)b+=' <span class="verified-badge">✓</span> ';if(u.banned)b+=' <span style="color:red;">БАН</span> ';if(w.length)b+=' <span style="color:var(--orange);">⚠'+w.length+'</span> ';return`<div class="row"><span><b>@${u.login}</b>${b} 🪙${u.coins||0}</span><div><button class="ok vbtn" data-l="${u.login}">${u.verified?'Снять✓':'✓Вериф'}</button><button class="${u.banned?'ok':'ban'} bbtn" data-l="${u.login}">${u.banned?'Разбан':'Бан'}</button><button class="wbtn" data-l="${u.login}" style="background:var(--orange);color:#000;">⚠</button><button class="del dbtn" data-l="${u.login}">🗑</button></div></div>`;}).join('');el.querySelectorAll('.vbtn').forEach(b=>b.onclick=async()=>{const u=await api('users?login=eq.'+encodeURIComponent(b.dataset.l));await api('users?login=eq.'+encodeURIComponent(b.dataset.l),'PATCH',{verified:!u[0].verified});addLog((!u[0].verified?'✅':'❌')+' @'+b.dataset.l);loadAdmin();});el.querySelectorAll('.bbtn').forEach(b=>b.onclick=async()=>{const u=await api('users?login=eq.'+encodeURIComponent(b.dataset.l));if(u[0].banned){await api('users?login=eq.'+encodeURIComponent(b.dataset.l),'PATCH',{banned:false,ban_reason:'',ban_until:0});}else{const r=prompt('Причина:');if(!r)return;const d=prompt('Дней:','0');if(d===null)return;await api('users?login=eq.'+encodeURIComponent(b.dataset.l),'PATCH',{banned:true,ban_reason:r,ban_until:parseInt(d)>0?Date.now()+parseInt(d)*86400000:0});}loadAdmin();});el.querySelectorAll('.wbtn').forEach(b=>b.onclick=async()=>{const r=prompt('Причина:');if(!r)return;const u=await api('users?login=eq.'+encodeURIComponent(b.dataset.l));const w=typeof u[0].warnings==='string'?JSON.parse(u[0].warnings):(u[0].warnings||[]);w.push(r);await api('users?login=eq.'+encodeURIComponent(b.dataset.l),'PATCH',{warnings:JSON.stringify(w)});loadAdmin();});el.querySelectorAll('.dbtn').forEach(b=>b.onclick=async()=>{if(!confirm('Удалить @'+b.dataset.l+'?'))return;const u=await api('users?login=eq.'+encodeURIComponent(b.dataset.l));await api('users?id=eq.'+u[0].id,'DELETE');loadAdmin();});}
+function renderAVideos(vids){const el=document.getElementById('aVideos');if(!el)return;el.innerHTML=vids.map(v=>`<div class="row"><span>🎬 ${v.name||''} · @${v.user_id} ${v.visibility==='private'?'🔒':''} ${v.pinned?'📌':''}</span><button class="del" data-vid="${v.id}">🗑</button></div>`).join('');el.querySelectorAll('button').forEach(b=>b.onclick=async()=>{if(!confirm('Удалить?'))return;await api('videos?id=eq.'+b.dataset.vid,'DELETE');loadAdmin();});}
+
+// ЗАПУСК
+(async()=>{
+  await setupStorage(); await ensureAdmin();
+  const sv=localStorage.getItem('tiktok_user');
+  if(sv){try{const u=await api('users?login=eq.'+encodeURIComponent(sv));if(u.length&&!u[0].banned)enter(u[0]);else{localStorage.removeItem('tiktok_user');}}catch(e){localStorage.removeItem('tiktok_user');}}
+})();
+</script>
+</body>
+</html>
