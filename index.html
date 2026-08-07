@@ -3,334 +3,565 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Хранилище · N25</title>
+  <title>TikTok UI ☁️</title>
   <style>
-    :root {
-      --bg: #0b0e14; --bg2: #1a1f2b; --card: rgba(10,12,20,0.7);
-      --text: #e0e0e0; --accent: #6c8cff; --border: rgba(255,255,255,0.1); --input: #1e2330;
-    }
-    .light {
-      --bg: #e8ecf1; --bg2: #d0d5dc; --card: rgba(255,255,255,0.8);
-      --text: #1a1f2b; --accent: #4a6cf7; --border: rgba(0,0,0,0.1); --input: #fff;
-    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: linear-gradient(150deg, var(--bg), var(--bg2));
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      min-height: 100vh; display: flex; justify-content: center; align-items: center;
-      padding: 20px; color: var(--text); transition: 0.3s;
-    }
-    .app {
-      max-width: 1100px; width: 100%; background: rgba(20,24,33,0.8);
-      backdrop-filter: blur(25px); border-radius: 40px; padding: 1.5rem;
-      box-shadow: 0 30px 50px rgba(0,0,0,0.5); border: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 1rem; margin: auto;
-    }
-    .light .app { background: rgba(255,255,255,0.7); }
-    .header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem; justify-content: center; }
-    .header h1 { font-size: 1.3rem; font-weight: 500; }
-    .badge { padding: 3px 8px; border-radius: 15px; font-size: 0.65rem; }
-    .badge.test { background: rgba(255,200,100,0.2); color: #ffcc88; }
-    .badge.ok { background: rgba(100,255,150,0.2); color: #8f8; }
-    .badge.err { background: rgba(255,100,100,0.2); color: #ff8888; }
-    .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
-    .search {
-      background: var(--input); border: 1px solid var(--border); border-radius: 25px;
-      padding: 8px 14px; color: var(--text); flex: 1; min-width: 150px; font-size: 0.85rem; max-width: 400px;
-    }
-    .icon-btn {
-      background: rgba(255,255,255,0.1); border: 1px solid var(--border);
-      border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1rem;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .tabs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
-    .tab {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      border-radius: 25px; padding: 6px 14px; color: var(--text); cursor: pointer; font-size: 0.75rem;
-    }
-    .tab.active { background: rgba(255,255,255,0.15); }
-    .tab.log-tab { background: rgba(255,200,100,0.1); border-color: rgba(255,200,100,0.3); }
-    .panel { display: none; flex-direction: column; gap: 0.8rem; }
-    .panel.active { display: flex; }
-    .drop-zone {
-      border: 2px dashed var(--border); border-radius: 16px; padding: 1.5rem;
-      text-align: center; cursor: pointer; color: #8890aa; transition: 0.3s; font-size: 0.85rem;
-      max-width: 500px; margin: 0 auto; width: 100%;
-    }
-    .drop-zone.drag { border-color: var(--accent); background: rgba(108,140,255,0.1); }
-    .drop-zone:hover { border-color: rgba(255,255,255,0.3); }
-    
-    .menu-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
-    .menu-btn {
-      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
-      border-radius: 20px; padding: 8px 14px; color: var(--text); cursor: pointer;
-      font-size: 0.8rem; position: relative; display: flex; align-items: center; gap: 6px;
-    }
-    .menu-btn:hover { background: rgba(255,255,255,0.15); }
-    .menu-btn .arrow { font-size: 0.6rem; }
-    .mini-menu {
-      display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px;
-      background: #1e2330; border: 1px solid var(--border); border-radius: 12px;
-      padding: 6px; z-index: 100; min-width: 180px; max-height: 300px; overflow-y: auto;
-    }
-    .mini-menu.show { display: block; }
-    .mini-menu button {
-      display: block; width: 100%; text-align: left; background: none; border: none;
-      color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem;
-    }
-    .mini-menu button:hover { background: rgba(255,255,255,0.1); }
-    .mini-menu button.active { background: rgba(108,140,255,0.2); color: #a0b8ff; }
-    .mini-menu .section-title { font-size: 0.7rem; color: #8890aa; padding: 6px 10px 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    body { background: #000; color: #fff; font-family: 'Segoe UI', Arial, sans-serif; height: 100vh; overflow: hidden; user-select: none; -webkit-user-select: none; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; justify-content: center; }
-    .card {
-      background: var(--card); border-radius: 14px; overflow: hidden;
-      border: 1px solid var(--border); max-width: 240px; margin: 0 auto; width: 100%;
-    }
-    .card img, .card video { width: 100%; max-height: 120px; object-fit: cover; background: #000; }
-    .card-body { padding: 8px; font-size: 0.75rem; }
-    .card-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-meta { font-size: 0.65rem; color: #96a0b8; display: flex; justify-content: space-between; }
-    .tag { background: rgba(108,140,255,0.2); padding: 1px 6px; border-radius: 8px; font-size: 0.6rem; color: #a0b8ff; margin: 1px; display: inline-block; }
-    .card-actions { display: flex; gap: 3px; margin-top: 3px; justify-content: center; }
-    .btn {
-      background: rgba(255,255,255,0.1); border: 1px solid var(--border);
-      border-radius: 20px; padding: 6px 12px; color: var(--text); cursor: pointer; font-size: 0.75rem;
-    }
-    .btn:hover { background: rgba(255,255,255,0.2); }
-    .btn-sm { padding: 3px 8px; font-size: 0.65rem; border-radius: 12px; }
-    .btn-accent { background: rgba(100,200,255,0.2); color: #a0d8ff; }
-    .btn-danger { background: rgba(255,90,90,0.2); color: #ffaaaa; }
-    .chart { width: 50px; height: 50px; border-radius: 50%; position: relative; margin: 0 auto; }
-    .chart span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; }
-    .gallery {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
-      display: none; align-items: center; justify-content: center; cursor: pointer;
-    }
-    .gallery.show { display: flex; }
-    .gallery img { max-width: 90%; max-height: 90%; border-radius: 20px; }
-    .p2p-box { border: 1px solid rgba(100,200,255,0.3); border-radius: 16px; padding: 0.8rem; text-align: center; }
-    .code { font-size: 1.1rem; font-weight: 700; color: #ffcc88; letter-spacing: 2px; }
-    .empty { text-align: center; padding: 1.5rem; color: #7b8399; grid-column: 1/-1; }
-    .toast {
-      position: fixed; top: 20px; right: 20px; background: #ff6b6b; color: white;
-      padding: 10px 16px; border-radius: 12px; z-index: 999; display: none;
-    }
-    .toast.show { display: block; animation: fade 3s forwards; }
-    @keyframes fade { 0%,70%{opacity:1} 100%{opacity:0} }
-    .current-settings { font-size: 0.7rem; color: #8890aa; text-align: center; }
-    .log-container { max-height: 500px; overflow-y: auto; }
-    .log-entry {
-      padding: 8px 12px; border-radius: 10px; margin-bottom: 4px;
-      font-size: 0.75rem; font-family: monospace; display: flex; gap: 10px; align-items: flex-start;
-    }
-    .log-entry.info { background: rgba(100,200,255,0.1); border-left: 3px solid #6c8cff; }
-    .log-entry.warn { background: rgba(255,200,100,0.1); border-left: 3px solid #ffcc88; }
-    .log-entry.error { background: rgba(255,100,100,0.1); border-left: 3px solid #ff6b6b; }
-    .log-entry.critical { background: rgba(255,50,50,0.2); border-left: 3px solid #ff3333; }
-    .log-entry.success { background: rgba(100,255,150,0.1); border-left: 3px solid #8f8; }
-    .log-num { min-width: 45px; color: #8890aa; }
-    .log-time { min-width: 70px; color: #6670aa; }
-    .log-msg { flex: 1; }
-    .log-stats { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; justify-content: center; }
-    .log-stat { font-size: 0.75rem; padding: 4px 10px; border-radius: 15px; background: rgba(0,0,0,0.3); }
-    .log-stat.c { color: #ff6b6b; }
-    .log-stat.e { color: #ff8888; }
-    .log-stat.w { color: #ffcc88; }
-    .log-stat.i { color: #a0d8ff; }
-    .log-stat.s { color: #8f8; }
-    .status { text-align: center; font-size: 0.75rem; color: #b9c2ff; }
+    #authScreen { position: fixed; inset: 0; background: #000; z-index: 100; display: flex; align-items: center; justify-content: center; }
+    #authScreen.hidden { display: none; }
+    #authBox { background: #111; border-radius: 20px; padding: 30px 25px; width: 90%; max-width: 350px; text-align: center; }
+    #authBox h1 { font-size: 32px; margin-bottom: 5px; }
+    #authBox h1 span { color: #ff0040; }
+    #authBox p { color: #888; margin-bottom: 20px; font-size: 14px; }
+    #authBox input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 12px; border: 1px solid #222; background: #000; color: #fff; font-size: 16px; outline: none; }
+    #authBox button { width: 100%; padding: 14px; margin: 6px 0; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+    #loginBtn { background: #ff0040; color: #fff; }
+    #registerBtn { background: #00e5ff; color: #000; }
+    #authError { color: #ff4444; margin-top: 10px; font-size: 14px; min-height: 20px; }
+
+    #app { height: 100vh; display: flex; flex-direction: column; }
+    #topBar { height: 50px; background: #0a0a0a; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; }
+    #topBar span { font-weight: bold; font-size: 18px; }
+    #topBar button { background: none; border: 1px solid #333; color: #fff; padding: 7px 15px; border-radius: 15px; font-size: 13px; cursor: pointer; }
+
+    #content { flex: 1; position: relative; overflow: hidden; }
+    .page { position: absolute; inset: 0; overflow-y: auto; display: none; }
+    .page.active { display: block; }
+
+    /* ЛЕНТА — строгий свайп на 1 видео */
+    #feedPage { overflow-y: scroll; scroll-snap-type: y mandatory; scroll-snap-stop: always; -webkit-overflow-scrolling: touch; }
+    .vid { width: 100%; height: calc(100vh - 110px); scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vid video { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .vid .info { position: absolute; bottom: 20px; left: 15px; right: 55px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 12px; pointer-events: none; }
+    .vid .info .uname { font-weight: bold; font-size: 14px; }
+    .vid .info .title { font-size: 12px; color: #ccc; margin-top: 3px; }
+    .vid .btns { position: absolute; right: 10px; bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
+    .vid .btns button { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+    .vid .btns span { font-size: 11px; display: block; text-align: center; }
+    .vid .sound { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    #profilePage { padding: 25px 25px 80px 25px; text-align: center; }
+    #avatarImg { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #222; cursor: pointer; }
+    #profilePage h3 { margin-top: 10px; font-size: 20px; }
+    #profilePage .st { color: #888; font-size: 13px; margin: 5px 0 15px; }
+    #profilePage button { display: block; width: 90%; max-width: 300px; margin: 6px auto; padding: 12px; border-radius: 20px; border: 1px solid #333; background: #111; color: #fff; font-size: 14px; cursor: pointer; }
+    #profilePage .toggle-btn { background: #22c55e; border: none; font-weight: bold; }
+    #profilePage .toggle-btn.private { background: #ff0040; }
+
+    .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #22c55e; font-size: 12px; color: #fff; margin-left: 5px; vertical-align: middle; }
+
+    #adminPage { padding: 15px 15px 90px 15px; }
+    #adminPage .stat { display: inline-block; background: #111; padding: 12px 16px; border-radius: 12px; margin: 4px; font-size: 13px; text-align: center; }
+    #adminPage .stat b { display: block; font-size: 20px; color: #ff0040; }
+    #adminPage input, #adminPage textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #222; background: #000; color: #fff; margin: 12px 0; font-size: 14px; outline: none; }
+    #adminPage textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+    #adminPage .row { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #111; border-radius: 10px; margin: 4px 0; font-size: 13px; flex-wrap: wrap; gap: 6px; }
+    #adminPage .row button { padding: 5px 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 11px; cursor: pointer; }
+    #adminPage .row .del { background: #ff0040; border-color: #ff0040; }
+    #adminPage .row .ban { background: #ff3333; border-color: #ff3333; }
+    #adminPage .row .ok { background: #22c55e; border-color: #22c55e; color: #000; }
+    #adminPage .mega-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; margin: 8px 0; }
+    #adminPage .broadcast-btn { background: linear-gradient(135deg, #ff0040, #ff6600); color: #fff; }
+    #adminPage .broadcast-btn:active { opacity: 0.8; }
+
+    #chatPage { padding: 15px 15px 80px 15px; }
+    .chatRow { display: flex; align-items: center; padding: 12px; background: #111; border-radius: 12px; margin: 4px 0; cursor: pointer; }
+    .chatAv { width: 40px; height: 40px; border-radius: 50%; background: #222; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; margin: 3px 0; font-size: 13px; }
+    .msg.sent { background: #ff0040; align-self: flex-end; }
+    .msg.recv { background: #1a1a1a; border: 1px solid #222; align-self: flex-start; }
+    #chatInput { display: flex; gap: 8px; padding: 10px; background: #0a0a0a; position: sticky; bottom: 0; }
+    #chatInput input { flex: 1; padding: 10px; border-radius: 18px; border: 1px solid #222; background: #000; color: #fff; }
+    #chatInput button { background: #ff0040; color: #fff; border: none; border-radius: 18px; padding: 10px 18px; cursor: pointer; font-weight: bold; }
+
+    #logPage { padding: 10px 10px 80px 10px; }
+    .log-entry { padding: 8px 12px; background: #0a0a0a; border-left: 4px solid #ff0040; margin: 3px 0; border-radius: 4px; font-size: 12px; font-family: monospace; }
+    .log-entry .ltime { color: #888; margin-right: 8px; }
+
+    #bottomBar { height: 60px; background: #0a0a0a; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #1a1a1a; position: absolute; bottom: 0; left: 0; right: 0; z-index: 20; flex-shrink: 0; }
+    #bottomBar .nav { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 11px; cursor: pointer; transition: color 0.2s; }
+    #bottomBar .nav.on { color: #fff; }
+    #bottomBar .nav .ico { font-size: 22px; }
+
+    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #ff0040; color: #fff; padding: 10px 20px; border-radius: 20px; z-index: 99; font-weight: bold; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
-<div class="toast" id="toast"></div>
-<div class="gallery" id="gallery"><img id="galleryImg" src="" alt=""></div>
 
-<div class="app" id="app">
-  <div class="header">
-    <h1>📦 Хранилище</h1>
-    <span class="badge test" id="ver">N25</span>
-    <span class="badge" id="ffmpegBadge">⏳</span>
-    <button class="icon-btn" id="themeBtn" title="Тема">🌙</button>
+<div id="authScreen">
+  <div id="authBox">
+    <h1>Tik<span>Tok</span> UI</h1>
+    <p>☁️ Облачная версия</p>
+    <input id="loginInput" placeholder="Логин">
+    <input id="passInput" type="password" placeholder="Пароль">
+    <button id="loginBtn">🚀 Войти</button>
+    <button id="registerBtn">✨ Создать аккаунт</button>
+    <div id="authError"></div>
   </div>
-
-  <div class="row">
-    <input type="text" class="search" id="search" placeholder="🔍 Поиск...">
-    <button class="btn" id="exportBtn">📤 Экспорт</button>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="video">🎬 Видео</button>
-    <button class="tab" data-tab="files">📁 Файлы</button>
-    <button class="tab" data-tab="all">🔀 Всё</button>
-    <button class="tab" data-tab="p2p">🔗 P2P</button>
-    <button class="tab log-tab" data-tab="logs">📋 Логи</button>
-  </div>
-
-  <div class="panel active" id="tab-video">
-    <div class="drop-zone" id="videoDrop">
-      📤 Нажмите сюда для выбора видео
-      <input type="file" id="videoInput" accept="video/*" hidden>
-    </div>
-    <div class="menu-row">
-      <div style="position:relative;"><button class="menu-btn" id="modeBtn"><span id="modeLabel">📥 Обычная</span> <span class="arrow">▼</span></button><div class="mini-menu" id="modeMenu"><button class="active" data-mode="normal">📥 Обычная</button><button data-mode="fast">⚡ Быстрая</button></div></div>
-      <div style="position:relative;"><button class="menu-btn" id="bitrateBtn"><span id="bitrateLabel">🎬 Битрейт: 5 Мбит/с</span> <span class="arrow">▼</span></button><div class="mini-menu" id="bitrateMenu"><div class="section-title">🎬 Профили битрейта</div><button data-bitrate="2" data-resolution="1280x720">💾 2 Мбит/с</button><button class="active" data-bitrate="5" data-resolution="1920x1080">📺 5 Мбит/с</button><button data-bitrate="10" data-resolution="1920x1080">🎥 10 Мбит/с</button><button data-bitrate="20" data-resolution="3840x2160">🎬 20 Мбит/с</button><button data-bitrate="40" data-resolution="7680x4320">🔥 40 Мбит/с</button></div></div>
-      <div style="position:relative;"><button class="menu-btn" id="enhanceBtn"><span id="enhanceLabel">✨ Улучшение: 100%</span> <span class="arrow">▼</span></button><div class="mini-menu" id="enhanceMenu"><div class="section-title">✨ Уровень улучшения</div><button data-enhance="0">🚫 Выкл</button><button data-enhance="25">25%</button><button data-enhance="50">50%</button><button class="active" data-enhance="100">100%</button><button data-enhance="200">200%</button><button data-enhance="300">300%</button><button data-enhance="500">500%</button></div></div>
-      <div style="position:relative;"><button class="menu-btn" id="processBtn"><span id="processLabel">🎬 С обработкой</span> <span class="arrow">▼</span></button><div class="mini-menu" id="processMenu"><button class="active" data-process="yes">🎬 С обработкой</button><button data-process="no">📦 Без обработки</button></div></div>
-    </div>
-    <div class="current-settings" id="currentSettings"></div>
-    <div id="progressRow" style="display:none;"><div class="row"><span id="progressLabel">⚙️ Обработка...</span><span id="progressPercent">0%</span></div><div style="height:4px;background:#2a3040;border-radius:10px;overflow:hidden;max-width:400px;margin:0 auto;width:100%;"><div id="progressFill" style="height:100%;background:#6c8cff;width:0%;transition:0.3s;"></div></div></div>
-    <div class="grid" id="videoGrid"></div>
-  </div>
-
-  <div class="panel" id="tab-files">
-    <div class="drop-zone" id="fileDrop">📤 Нажмите сюда для выбора файлов<input type="file" id="fileInput" multiple hidden></div>
-    <div class="grid" id="fileGrid"></div>
-  </div>
-
-  <div class="panel" id="tab-all">
-    <div class="row"><button class="btn" id="shuffleBtn">🔄 Перемешать</button><div class="chart" id="chart"></div></div>
-    <div class="grid" id="allGrid"></div>
-  </div>
-
-  <div class="panel" id="tab-p2p">
-    <div class="p2p-box">
-      <p>🔗 Код: <span class="code" id="myCode">—</span> <button class="btn btn-sm" id="copyCode">📋</button></p>
-      <p>🔗 Ссылка: <span id="shareLink" style="word-break:break-all;font-size:0.7rem;">—</span> <button class="btn btn-sm" id="copyLink">📋</button></p>
-      <div class="row"><input type="text" id="remoteCode" placeholder="Код" maxlength="8" style="background:var(--input);border:1px solid var(--border);border-radius:20px;padding:6px;color:var(--text);width:110px;text-align:center;"><button class="btn btn-accent" id="connectBtn">🔗</button></div>
-      <div id="remoteGrid"></div>
-    </div>
-  </div>
-
-  <div class="panel" id="tab-logs">
-    <div class="log-stats" id="logStats"><span class="log-stat c">🔥 0</span><span class="log-stat e">❌ 0</span><span class="log-stat w">⚠️ 0</span><span class="log-stat i">ℹ️ 0</span><span class="log-stat s">✅ 0</span></div>
-    <div class="row"><button class="btn btn-sm" id="clearLogsBtn">🗑️ Очистить</button><button class="btn btn-sm" id="exportLogsBtn">📤 Экспорт логов</button></div>
-    <div class="log-container" id="logContainer"></div>
-  </div>
-
-  <div class="status" id="status"></div>
 </div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<div id="app">
+  <div id="topBar"><span>TikTok UI</span><button id="logoutBtn">Выйти</button></div>
+  <div id="content">
+    <div id="feedPage" class="page active"></div>
+    <div id="chatPage" class="page"></div>
+    <div id="profilePage" class="page">
+      <img id="avatarImg" src=""><input type="file" id="avatarFile" accept="image/*" hidden>
+      <h3 id="profileName"></h3><div class="st" id="profileStats"></div>
+      <button id="chNickBtn">✏️ Изменить ник</button>
+      <button id="chPassBtn">🔒 Изменить пароль</button>
+      <button id="uploadBtn">📤 Загрузить видео</button>
+      <input type="file" id="videoFile" accept="video/*" hidden>
+      <button id="visibilityBtn" class="toggle-btn">🌍 Видимость: Для всех</button>
+      <div id="uploadStatus" style="color:#888;margin-top:8px;"></div>
+    </div>
+    <div id="adminPage" class="page"></div>
+    <div id="logPage" class="page"></div>
+  </div>
+  <div id="bottomBar">
+    <div class="nav on" data-p="feedPage"><span class="ico">🏠</span>Главная</div>
+    <div class="nav" data-p="chatPage"><span class="ico">💬</span>Чаты</div>
+    <div class="nav" data-p="profilePage"><span class="ico">👤</span>Профиль</div>
+    <div class="nav" id="adminNav" data-p="adminPage" style="display:none;"><span class="ico">🛡️</span>Админ</div>
+    <div class="nav" data-p="logPage"><span class="ico">📋</span>Логи</div>
+  </div>
+</div>
+<div id="toast"></div>
+
 <script>
-(async function() {
-  const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
-  const logs=[],LOG={C:'critical',E:'error',W:'warn',I:'info',S:'success'};let logCounter=1;
-  function addLog(t,m){const e={num:logCounter++,type:t,msg:m,time:new Date().toLocaleTimeString(),date:new Date().toLocaleDateString()};logs.unshift(e);if(logs.length>500)logs.length=500;renderLogs();updateLogStats();console[t===LOG.C||t===LOG.E?'error':t===LOG.W?'warn':'log'](`[${t.toUpperCase()}] #${e.num}: ${m}`);return e.num}
-  function renderLogs(){$('#logContainer').innerHTML=logs.map(l=>{const e={critical:'🔥',error:'❌',warn:'⚠️',info:'ℹ️',success:'✅'}[l.type]||'';return `<div class="log-entry ${l.type}"><span class="log-num">#${l.num}</span><span class="log-time">${l.time}</span><span class="log-msg">${e} ${l.msg}</span></div>`}).join('')}
-  function updateLogStats(){const c={};logs.forEach(l=>c[l.type]=(c[l.type]||0)+1);$('#logStats').innerHTML=`<span class="log-stat c">🔥 ${c.critical||0}</span><span class="log-stat e">❌ ${c.error||0}</span><span class="log-stat w">⚠️ ${c.warn||0}</span><span class="log-stat i">ℹ️ ${c.info||0}</span><span class="log-stat s">✅ ${c.success||0}</span>`}
-  addLog(LOG.I,'🚀 N25 запущен');
-  addLog(LOG.I,'📋 Система логирования активна');
+const URL = 'https://gtyjjzmvdhglxfjrwejh.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0eWpqem12ZGhnbHhmanJ3ZWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNDc1NjMsImV4cCI6MjEwMTYyMzU2M30.8KOimAzsQbj5xPukQswdW05dvW5sat3xvyfxB44_J5Y';
 
-  let ffmpegLoaded=false,ffmpeg=null;
+let ME = '', ADMIN = false, SOUND = false, MY_VISIBILITY = 'all';
+const LOGS = [];
 
-  // ============================================
-  // ВСТАВЬ НОВЫЙ initFFmpeg ЗДЕСЬ
-  // ============================================
-  async function initFFmpeg(){
-    const startTime=Date.now();
-    addLog(LOG.I,'⏳ Загрузка FFmpeg...');
-    
-    let a=0;
-    while(!window.FFmpegWasm && a<80){await new Promise(r=>setTimeout(r,500));a++;}
-    
-    if(!window.FFmpegWasm){
-      addLog(LOG.W,'📡 Пробую запасной CDN...');
-      await new Promise((resolve)=>{
-        const s=document.createElement('script');
-        s.src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js';
-        s.onload=resolve;
-        s.onerror=()=>resolve();
-        document.head.appendChild(s);
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+function addLog(msg) {
+  const now = new Date();
+  const time = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  LOGS.push({ time, msg });
+  if (LOGS.length > 200) LOGS.shift();
+  renderLogs();
+}
+
+function renderLogs() {
+  const lp = document.getElementById('logPage');
+  if (!lp.classList.contains('active')) return;
+  lp.innerHTML = LOGS.map(l => `<div class="log-entry"><span class="ltime">${l.time}</span>${l.msg}</div>`).join('');
+  lp.scrollTop = lp.scrollHeight;
+}
+
+async function api(path, method = 'GET', body = null) {
+  const h = { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY };
+  const o = { method, headers: h };
+  if (body) o.body = JSON.stringify(body);
+  const r = await fetch(URL + '/rest/v1/' + path, o);
+  const t = await r.text();
+  if (!r.ok) { console.error('❌', method, path, t); throw new Error(t); }
+  return t ? JSON.parse(t) : [];
+}
+
+async function setupStorage() {
+  try {
+    await fetch(URL + '/storage/v1/bucket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY },
+      body: JSON.stringify({ name: 'tiktok-videos', public: true })
+    });
+  } catch (e) {}
+}
+
+// НАВИГАЦИЯ
+document.querySelectorAll('#bottomBar .nav').forEach(n => n.onclick = () => {
+  document.querySelectorAll('#bottomBar .nav').forEach(x => x.classList.remove('on'));
+  n.classList.add('on');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const id = n.dataset.p;
+  document.getElementById(id).classList.add('active');
+  if (id === 'feedPage') loadFeed();
+  if (id === 'chatPage') loadChats();
+  if (id === 'profilePage') loadProfile();
+  if (id === 'adminPage') loadAdmin();
+  if (id === 'logPage') renderLogs();
+});
+
+// АДМИН
+async function ensureAdmin() {
+  try {
+    const u = await api('users?login=eq.Grustish');
+    if (!u.length) {
+      await api('users', 'POST', {
+        login: 'Grustish', password: 'Grusti01', nickname: 'Grustish Admin',
+        avatar: '', role: 'admin', verified: true, banned: false,
+        ban_reason: '', ban_until: 0, warnings: '[]', visibility: 'all',
+        created: new Date().toISOString()
       });
-      let fa=0;
-      while(!window.FFmpegWasm && fa<40){await new Promise(r=>setTimeout(r,500));fa++;}
+      addLog('👑 Админ Grustish создан автоматически');
+    } else if (!u[0].verified || u[0].role !== 'admin') {
+      await api('users?login=eq.Grustish', 'PATCH', { role: 'admin', verified: true });
+      addLog('👑 Админ Grustish обновлён (admin + verified)');
+    }
+  } catch (e) { console.error('Ошибка создания админа:', e); }
+}
+
+// ВХОД
+document.getElementById('loginBtn').onclick = async () => {
+  const l = document.getElementById('loginInput').value.trim();
+  const p = document.getElementById('passInput').value.trim();
+  if (!l || !p) return document.getElementById('authError').textContent = 'Заполните поля';
+  try {
+    const u = await api('users?login=eq.' + encodeURIComponent(l));
+    if (!u.length) return document.getElementById('authError').textContent = 'Пользователь не найден';
+    if (u[0].banned) return document.getElementById('authError').textContent = '🚫 Вы забанены';
+    if (u[0].password !== p) return document.getElementById('authError').textContent = 'Неверный пароль';
+    enter(u[0]);
+  } catch (e) { document.getElementById('authError').textContent = 'Ошибка (F12)'; console.error(e); }
+};
+
+// РЕГИСТРАЦИЯ
+document.getElementById('registerBtn').onclick = async () => {
+  const l = document.getElementById('loginInput').value.trim();
+  const p = document.getElementById('passInput').value.trim();
+  if (!l || !p) return document.getElementById('authError').textContent = 'Заполните поля';
+  if (l.length < 2) return document.getElementById('authError').textContent = 'Логин короткий';
+  if (p.length < 3) return document.getElementById('authError').textContent = 'Пароль короткий';
+  try {
+    const exist = await api('users?login=eq.' + encodeURIComponent(l));
+    if (exist.length) return document.getElementById('authError').textContent = 'Логин занят';
+    await api('users', 'POST', {
+      login: l, password: p, nickname: l, avatar: '', role: 'user',
+      verified: false, banned: false, ban_reason: '', ban_until: 0,
+      warnings: '[]', visibility: 'all', created: new Date().toISOString()
+    });
+    addLog('✅ Регистрация: @' + l);
+    toast('✅ Аккаунт создан!');
+    enter({ login: l, role: 'user', verified: false, warnings: [], visibility: 'all' });
+  } catch (e) { document.getElementById('authError').textContent = 'Ошибка (F12)'; console.error(e); }
+};
+
+function enter(u) {
+  ME = u.login;
+  ADMIN = u.role === 'admin';
+  MY_VISIBILITY = u.visibility || 'all';
+  localStorage.setItem('tiktok_user', ME);
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('adminNav').style.display = ADMIN ? 'flex' : 'none';
+  addLog('🔑 Вход: @' + ME + (ADMIN ? ' [АДМИН]' : ''));
+  loadFeed(); loadProfile();
+  toast('👋 Добро пожаловать, @' + ME + '!');
+}
+
+document.getElementById('logoutBtn').onclick = () => {
+  addLog('🚪 Выход: @' + ME);
+  localStorage.removeItem('tiktok_user');
+  location.reload();
+};
+
+// ЛЕНТА (строгий свайп)
+async function loadFeed() {
+  const fp = document.getElementById('feedPage');
+  fp.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Загрузка...</div>';
+  try {
+    const allVids = await api('videos?select=*');
+    // Фильтруем: показываем видео со статусом 'all' ИЛИ свои собственные
+    const vids = allVids.filter(v => v.visibility === 'all' || v.user_id === ME);
+    if (!vids.length) { fp.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">📹 Нет видео</div>'; return; }
+    fp.innerHTML = '';
+    vids.sort(() => Math.random() - 0.5);
+    vids.forEach(v => {
+      const d = document.createElement('div');
+      d.className = 'vid';
+      const canDel = (v.user_id === ME) || ADMIN;
+      d.innerHTML = `<video src="${v.url}" loop playsinline muted preload="auto"></video><div class="sound">🔇</div>
+        <div class="info"><div class="uname">@${v.user_id}</div><div class="title">${v.name||''} ${v.visibility==='private'?'🔒':''}</div></div>
+        <div class="btns"><button class="lk">❤️<span>${v.likes||0}</span></button>${canDel?'<button class="dl">🗑️</button>':''}</div>`;
+      
+      const vid = d.querySelector('video');
+      const snd = d.querySelector('.sound');
+      
+      const obs = new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) { vid.muted = !SOUND; snd.textContent = SOUND ? '🔊' : '🔇'; vid.play().catch(() => {}); }
+        else { vid.muted = true; snd.textContent = '🔇'; vid.pause(); }
+      }, { threshold: 0.7 });
+      obs.observe(d);
+      
+      snd.onclick = e => { e.stopPropagation(); SOUND = !SOUND; vid.muted = !SOUND; snd.textContent = SOUND ? '🔊' : '🔇'; if (SOUND) vid.play().catch(() => {}); };
+      
+      d.querySelector('.lk').onclick = async e => {
+        e.stopPropagation(); const nl = (v.likes || 0) + 1;
+        d.querySelector('.lk span').textContent = nl;
+        await api('videos?id=eq.' + v.id, 'PATCH', { likes: nl });
+      };
+      
+      const dl = d.querySelector('.dl');
+      if (dl) dl.onclick = async e => {
+        e.stopPropagation(); if (!confirm('Удалить?')) return;
+        await api('videos?id=eq.' + v.id, 'DELETE');
+        addLog('🗑️ Удалено видео #' + v.id); toast('🗑️ Удалено'); loadFeed();
+      };
+      
+      fp.appendChild(d);
+    });
+  } catch (e) { fp.innerHTML = '<div style="text-align:center;padding:40px;color:red;">Ошибка</div>'; console.error(e); }
+}
+
+// ПРОФИЛЬ
+async function loadProfile() {
+  try {
+    const u = await api('users?login=eq.' + encodeURIComponent(ME));
+    if (!u.length) return;
+    const user = u[0];
+    MY_VISIBILITY = user.visibility || 'all';
+    document.getElementById('avatarImg').src = user.avatar || '';
+    let nm = '@' + ME;
+    if (user.verified) nm += ' <span class="verified-badge">✓</span>';
+    const w = typeof user.warnings === 'string' ? JSON.parse(user.warnings) : (user.warnings || []);
+    if (w.length) nm += ' <span style="background:#f59e0b;color:#000;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px;">⚠'+w.length+'</span>';
+    document.getElementById('profileName').innerHTML = nm;
+    
+    const allVids = await api('videos?select=*');
+    const mv = allVids.filter(v => v.user_id === ME);
+    const flr = await api('follows?following=eq.' + encodeURIComponent(ME));
+    const flg = await api('follows?follower=eq.' + encodeURIComponent(ME));
+    document.getElementById('profileStats').textContent = '📹 '+mv.length+' видео · 👥 '+flr.length+' подп. · 🔔 '+flg.length+' подписок';
+    
+    // Кнопка видимости
+    const vb = document.getElementById('visibilityBtn');
+    if (MY_VISIBILITY === 'private') {
+      vb.textContent = '🔒 Видимость: Только я';
+      vb.className = 'toggle-btn private';
+    } else {
+      vb.textContent = '🌍 Видимость: Для всех';
+      vb.className = 'toggle-btn';
     }
     
-    if(!window.FFmpegWasm){
-      addLog(LOG.C,'FFmpeg не загрузился');
-      addLog(LOG.W,'Видео без обработки');
-      return;
-    }
-    
-    try{
-      const{FFmpeg}=window.FFmpegWasm;
-      ffmpeg=new FFmpeg();
-      await ffmpeg.load();
-      ffmpegLoaded=true;
-      const t=((Date.now()-startTime)/1000).toFixed(0);
-      $('#ffmpegBadge').textContent='✅ FFmpeg';
-      $('#ffmpegBadge').className='badge ok';
-      addLog(LOG.S,`FFmpeg готов (${t}сек)`);
-    }catch(e){
-      addLog(LOG.E,`Ошибка FFmpeg: ${e.message}`);
-    }
+    ADMIN = user.role === 'admin';
+    document.getElementById('adminNav').style.display = ADMIN ? 'flex' : 'none';
+  } catch (e) { console.error(e); }
+}
+
+// КНОПКА ВИДИМОСТИ
+document.getElementById('visibilityBtn').onclick = async () => {
+  const newVis = MY_VISIBILITY === 'all' ? 'private' : 'all';
+  await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { visibility: newVis });
+  // Обновляем все свои видео
+  const myVids = await api('videos?user_id=eq.' + encodeURIComponent(ME));
+  for (const v of myVids) {
+    await api('videos?id=eq.' + v.id, 'PATCH', { visibility: newVis });
   }
-  // ============================================
-  // КОНЕЦ ВСТАВКИ
-  // ============================================
+  MY_VISIBILITY = newVis;
+  addLog(newVis === 'all' ? '🌍 Видео открыты для всех' : '🔒 Видео скрыты (только я)');
+  toast(newVis === 'all' ? '🌍 Видео видны всем' : '🔒 Видео видны только вам');
+  loadProfile();
+  loadFeed();
+};
 
-  let uploadMode='normal',bitrate='5',resolution='1920x1080',enhanceLevel=100,processVideo='yes',myCode,filter='';
-  function updateSettings(){$('#currentSettings').textContent=`${uploadMode==='fast'?'⚡ Быстрая':'📥 Обычная'} · ${bitrate}Мбит/с · ${processVideo==='yes'?'обработка':'без'} · ${enhanceLevel}%`}
+document.getElementById('avatarImg').onclick = () => document.getElementById('avatarFile').click();
+document.getElementById('avatarFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = async ev => {
+    await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { avatar: ev.target.result });
+    document.getElementById('avatarImg').src = ev.target.result;
+    addLog('🖼️ Аватар обновлён'); toast('🖼️ Аватар обновлён');
+  };
+  r.readAsDataURL(f);
+};
 
-  const DB='FileStorageDB',Vv=1,VS='videos',FS='files';let db;
-  function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,Vv);r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(VS))d.createObjectStore(VS,{keyPath:'id',autoIncrement:true});if(!d.objectStoreNames.contains(FS))d.createObjectStore(FS,{keyPath:'id',autoIncrement:true})};r.onsuccess=e=>{db=e.target.result;resolve()};r.onerror=()=>reject()})}
-  const getAll=s=>new Promise(r=>{const t=db.transaction([s],'readonly');t.objectStore(s).getAll().onsuccess=e=>r(e.target.result||[])});
-  const addItem=(s,d)=>new Promise(r=>{const t=db.transaction([s],'readwrite');t.objectStore(s).add(d).onsuccess=e=>r(e.target.result)});
-  const delItem=(s,id)=>new Promise(r=>{const t=db.transaction([s],'readwrite');t.objectStore(s).delete(id);t.oncomplete=()=>r()});
+document.getElementById('uploadBtn').onclick = () => document.getElementById('videoFile').click();
+document.getElementById('videoFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  document.getElementById('uploadStatus').textContent = '⏳ Загрузка...';
+  try {
+    const fn = Date.now() + '_' + f.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    const uploadRes = await fetch(URL + '/storage/v1/object/tiktok-videos/' + fn, {
+      method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': f.type || 'video/mp4', 'x-upsert': 'true' }, body: f
+    });
+    if (!uploadRes.ok) throw new Error('Storage error');
+    const vurl = URL + '/storage/v1/object/public/tiktok-videos/' + fn;
+    await api('videos', 'POST', {
+      user_id: ME, name: f.name, url: vurl, duration: 0, likes: 0, views: 0, comments: 0,
+      visibility: MY_VISIBILITY, created: new Date().toISOString()
+    });
+    document.getElementById('uploadStatus').textContent = '✅ Готово!';
+    addLog('📤 Загружено видео: ' + f.name + ' (' + MY_VISIBILITY + ')');
+    toast('📤 Видео загружено!');
+    document.getElementById('videoFile').value = '';
+    loadFeed(); loadProfile();
+    setTimeout(() => document.getElementById('uploadStatus').textContent = '', 3000);
+  } catch (er) { document.getElementById('uploadStatus').textContent = '❌ Ошибка'; console.error(er); }
+};
 
-  function toggleMenu(m){const o=m.classList.contains('show');$$('.mini-menu').forEach(x=>x.classList.remove('show'));if(!o)m.classList.add('show')}
-  document.addEventListener('click',e=>{if(!e.target.closest('.menu-btn'))$$('.mini-menu').forEach(m=>m.classList.remove('show'))});
+document.getElementById('chNickBtn').onclick = async () => {
+  const u = await api('users?login=eq.' + encodeURIComponent(ME));
+  const nn = prompt('Новый ник:', u[0]?.nickname || ME);
+  if (nn && nn.trim()) { await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { nickname: nn.trim() }); addLog('✏️ Ник изменён'); toast('✏️ Готово'); loadProfile(); }
+};
 
-  let light=localStorage.getItem('theme')==='light';if(light){$('#app').classList.add('light');$('#themeBtn').textContent='☀️'}
-  $('#themeBtn').addEventListener('click',()=>{light=!light;$('#app').classList.toggle('light',light);$('#themeBtn').textContent=light?'☀️':'🌙';localStorage.setItem('theme',light?'light':'dark')});
-  $$('.tab').forEach(t=>t.addEventListener('click',()=>{$$('.tab').forEach(b=>b.classList.remove('active'));t.classList.add('active');$$('.panel').forEach(p=>p.classList.remove('active'));$(`#tab-${t.dataset.tab}`).classList.add('active')}));
-  $('#modeBtn').addEventListener('click',e=>{e.stopPropagation();toggleMenu($('#modeMenu'))});$$('#modeMenu button').forEach(b=>b.addEventListener('click',()=>{$$('#modeMenu button').forEach(x=>x.classList.remove('active'));b.classList.add('active');uploadMode=b.dataset.mode;$('#modeLabel').textContent=uploadMode==='fast'?'⚡ Быстрая':'📥 Обычная';$('#modeMenu').classList.remove('show');updateSettings()}));
-  $('#bitrateBtn').addEventListener('click',e=>{e.stopPropagation();toggleMenu($('#bitrateMenu'))});$$('#bitrateMenu button').forEach(b=>b.addEventListener('click',()=>{$$('#bitrateMenu button').forEach(x=>x.classList.remove('active'));b.classList.add('active');bitrate=b.dataset.bitrate;resolution=b.dataset.resolution;$('#bitrateLabel').textContent=`🎬 ${bitrate} Мбит/с`;$('#bitrateMenu').classList.remove('show');updateSettings()}));
-  $('#enhanceBtn').addEventListener('click',e=>{e.stopPropagation();toggleMenu($('#enhanceMenu'))});$$('#enhanceMenu button').forEach(b=>b.addEventListener('click',()=>{$$('#enhanceMenu button').forEach(x=>x.classList.remove('active'));b.classList.add('active');enhanceLevel=parseInt(b.dataset.enhance);$('#enhanceLabel').textContent=`✨ ${enhanceLevel}%`;$('#enhanceMenu').classList.remove('show');updateSettings()}));
-  $('#processBtn').addEventListener('click',e=>{e.stopPropagation();toggleMenu($('#processMenu'))});$$('#processMenu button').forEach(b=>b.addEventListener('click',()=>{$$('#processMenu button').forEach(x=>x.classList.remove('active'));b.classList.add('active');processVideo=b.dataset.process;$('#processLabel').textContent=processVideo==='yes'?'🎬 С обработкой':'📦 Без обработки';$('#processMenu').classList.remove('show');updateSettings()}));
-  $('#search').addEventListener('input',()=>{filter=$('#search').value.toLowerCase();refresh()});
-  function filterItems(items){if(!filter)return items;return items.filter(i=>(i.fileName||'').toLowerCase().includes(filter)||(i.tags||[]).join(' ').toLowerCase().includes(filter))}
+document.getElementById('chPassBtn').onclick = async () => {
+  const u = await api('users?login=eq.' + encodeURIComponent(ME));
+  const op = prompt('Старый пароль:');
+  if (u[0]?.password !== op) return toast('❌ Неверно');
+  const np = prompt('Новый пароль:');
+  if (np && np.length >= 3) { await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { password: np }); addLog('🔒 Пароль изменён'); toast('🔒 Готово'); }
+};
 
-  async function encodeVideo(file){if(!ffmpegLoaded)return{blob:file,quality:'original'};if(processVideo==='no')return{blob:file,quality:'original'};if(enhanceLevel===0)return{blob:file,quality:'original'};const fb=(parseFloat(bitrate)*(enhanceLevel/100)).toFixed(0)+'M';$('#progressRow').style.display='block';try{const inn='in_'+Date.now()+'.'+(file.name.split('.').pop()||'mp4'),out='out_'+Date.now()+'.mp4';await ffmpeg.writeFile(inn,new Uint8Array(await file.arrayBuffer()));ffmpeg.on('progress',({progress})=>{const p=Math.round(progress*100);$('#progressFill').style.width=p+'%';$('#progressPercent').textContent=p+'%'});await ffmpeg.exec(['-i',inn,'-vf',`scale=${resolution}`,'-b:v',fb,'-c:v','libx264','-preset','fast','-c:a','aac','-b:a','128k',out]);const od=await ffmpeg.readFile(out),blob=new Blob([od.buffer],{type:'video/mp4'});await ffmpeg.deleteFile(inn);await ffmpeg.deleteFile(out);$('#progressRow').style.display='none';return{blob,quality:`${resolution} ${fb}`}}catch(e){$('#progressRow').style.display='none';return{blob:file,quality:'original'}}}
+// ==================== АДМИН-ПАНЕЛЬ (С МАССОВОЙ РАССЫЛКОЙ) ====================
+async function loadAdmin() {
+  const ap = document.getElementById('adminPage');
+  if (!ADMIN) { ap.innerHTML = '<div style="padding:30px;text-align:center;color:red;">⛔ Нет доступа</div>'; return; }
+  ap.innerHTML = '<div style="text-align:center;padding:30px;">Загрузка...</div>';
+  try {
+    const users = await api('users?select=*');
+    const vids = await api('videos?select=*');
+    const bc = users.filter(u => u.banned).length;
+    const vc = users.filter(u => u.verified).length;
+    
+    ap.innerHTML = `
+      <div><span class="stat"><b>${users.length}</b>Польз.</span><span class="stat"><b>${vids.length}</b>Видео</span><span class="stat"><b>${bc}</b>Банов</span><span class="stat"><b>${vc}</b>Вериф.</span></div>
+      
+      <!-- 🔥 ИМБОВАЯ ФУНКЦИЯ: МАССОВАЯ РАССЫЛКА -->
+      <div style="background:#1a1a1a;border-radius:16px;padding:16px;margin:15px 0;border:2px solid #ff0040;">
+        <h3 style="margin:0 0 10px;color:#ff0040;">📢 Массовая рассылка уведомлений</h3>
+        <textarea id="broadcastMsg" placeholder="Текст уведомления для ВСЕХ пользователей..."></textarea>
+        <button class="mega-btn broadcast-btn" id="broadcastBtn">🚀 Отправить всем (${users.length} чел.)</button>
+        <div id="broadcastStatus" style="margin-top:8px;font-size:12px;color:#888;"></div>
+      </div>
+      
+      <input id="aSearch" placeholder="🔍 Поиск..." oninput="window._as()">
+      <h4>👥 Пользователи</h4><div id="aUsers"></div>
+      <h4>🎬 Видео</h4><div id="aVideos"></div>
+      <div style="height:20px;"></div>`;
+    
+    // Обработчик рассылки
+    document.getElementById('broadcastBtn').onclick = async () => {
+      const msg = document.getElementById('broadcastMsg').value.trim();
+      if (!msg) return toast('Введите текст!');
+      const st = document.getElementById('broadcastStatus');
+      st.textContent = '⏳ Отправка...';
+      let sent = 0;
+      for (const u of users) {
+        try {
+          await api('messages', 'POST', {
+            from_user: 'Grustish',
+            to_user: u.login,
+            text: '📢 СИСТЕМНОЕ УВЕДОМЛЕНИЕ: ' + msg,
+            created: new Date().toISOString()
+          });
+          sent++;
+        } catch (e) {}
+      }
+      st.textContent = '✅ Отправлено: ' + sent + '/' + users.length;
+      addLog('📢 Рассылка: "' + msg + '" → ' + sent + ' пользователей');
+      toast('📢 Отправлено ' + sent + ' пользователям!');
+    };
+    
+    window._au = users; window._av = vids;
+    renderAUsers(users); renderAVideos(vids);
+  } catch (e) { ap.innerHTML = '<div style="color:red;">Ошибка</div>'; }
+}
 
-  function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-  const isImg=n=>/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(n),isVid=n=>/\.(mp4|webm|mov|mkv|avi)$/i.test(n),isAud=n=>/\.(mp3|wav|ogg|flac|aac)$/i.test(n);
-  function card(item,store){const c=document.createElement('div');c.className='card';const url=URL.createObjectURL(item.blob),mb=(item.size/(1024*1024)).toFixed(2),name=item.fileName||'file';let pv='';if(isImg(name))pv=`<img src="${url}" onclick="$('#galleryImg').src='${url}';$('#gallery').classList.add('show')">`;else if(isVid(name))pv=`<video src="${url}" controls></video>`;else if(isAud(name))pv=`<div style="padding:20px;text-align:center;">🎵<br><audio src="${url}" controls style="width:100%;margin-top:8px;"></audio></div>`;else{const e=name.endsWith('.pdf')?'📕':name.endsWith('.zip')||name.endsWith('.rar')?'📦':'📄';pv=`<div style="height:100px;display:flex;align-items:center;justify-content:center;font-size:2rem;">${e}</div>`}const tags=(item.tags||[]).map(t=>`<span class="tag">${t}</span>`).join(''),qi=item.quality?`<div class="card-meta">🎬 ${item.quality}</div>`:'';c.innerHTML=`${pv}<div class="card-body"><div class="card-title">📁 ${name}</div><div class="card-meta">💾 ${mb} МБ</div>${qi}${tags?'<div>'+tags+'</div>':''}<div class="card-actions"><button class="btn btn-sm tag-btn">🏷️</button><button class="btn btn-sm btn-danger del-btn">🗑️</button></div></div>`;c.querySelector('.del-btn').addEventListener('click',async()=>{if(!confirm('Удалить?'))return;await delItem(store,item.id);await refresh()});c.querySelector('.tag-btn').addEventListener('click',async()=>{const t=prompt('Теги:');if(t===null)return;item.tags=t.split(',').map(x=>x.trim()).filter(Boolean);await addItem(store,item);await refresh()});return c}
-  async function renderGrid(grid,store){const items=filterItems(await getAll(store));grid.innerHTML='';if(!items.length){grid.innerHTML='<div class="empty">Пусто</div>';return}items.sort((a,b)=>b.timestamp-a.timestamp);items.forEach(i=>grid.appendChild(card(i,store)))}
-  async function renderAll(){const v=(await getAll(VS)).map(x=>({...x,store:VS})),f=(await getAll(FS)).map(x=>({...x,store:FS})),all=filterItems([...v,...f]);all.sort(()=>Math.random()-.5);const grid=$('#allGrid');grid.innerHTML='';if(!all.length){grid.innerHTML='<div class="empty">🔀 Пусто</div>';return}all.forEach(i=>grid.appendChild(card(i,i.store)));const tv=v.reduce((s,x)=>s+(x.size||0),0),tf=f.reduce((s,x)=>s+(x.size||0),0),total=tv+tf||1;$('#chart').innerHTML=`<div style="width:100%;height:100%;border-radius:50%;background:conic-gradient(var(--accent) ${(tv/total)*360}deg, #f59e0b ${(tv/total)*360}deg 360deg);"></div><span>🎬${((tv/total)*100).toFixed(0)}%</span>`}
-  async function refresh(){await renderGrid($('#videoGrid'),VS);await renderGrid($('#fileGrid'),FS);await renderAll();await checkFull();await updateShared()}
-  async function checkFull(){const v=await getAll(VS),f=await getAll(FS);if(v.reduce((s,x)=>s+(x.size||0),0)>120*.9*1024*1024*1024||f.reduce((s,x)=>s+(x.size||0),0)>60*.9*1024*1024*1024)toast('⚠️ Заполнено на 90%')}
-  function setupDrop(zone,input,store,isVid){zone.addEventListener('click',()=>input.click());zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag')});zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));zone.addEventListener('drop',async e=>{e.preventDefault();zone.classList.remove('drag');for(const f of e.dataTransfer.files){if(isVid)await uploadVideo(f);else await addItem(store,{blob:f,fileName:f.name,timestamp:Date.now(),size:f.size,tags:[]})}await refresh()});input.addEventListener('change',async e=>{for(const f of e.target.files){if(isVid)await uploadVideo(f);else await addItem(store,{blob:f,fileName:f.name,timestamp:Date.now(),size:f.size,tags:[]})}input.value='';await refresh()})}
-  async function uploadVideo(file){if(!file)return;let d=0;if(uploadMode==='normal'){d=await new Promise(r=>{const v=document.createElement('video');v.preload='metadata';const u=URL.createObjectURL(file);v.src=u;v.onloadedmetadata=()=>{URL.revokeObjectURL(u);r(v.duration)};v.onerror=()=>{URL.revokeObjectURL(u);r(0)}});if(d>1200){toast('Длиннее 20 мин!');return}}let blob=file,quality='original';if(uploadMode==='normal'&&processVideo==='yes'&&enhanceLevel>0){const r=await encodeVideo(file);blob=r.blob;quality=r.quality}await addItem(VS,{blob,fileName:file.name,duration:d,quality,timestamp:Date.now(),size:blob.size,tags:[]})}
-  function genCode(){return Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('')}
-  function getCode(){let c=localStorage.getItem('peer_code');if(!c){c=genCode();localStorage.setItem('peer_code',c)}return c}
-  function getShareLink(code){const u=new URL(location.href);u.searchParams.set('code',code);return u.toString()}
-  async function updateShared(){const v=await getAll(VS),f=await getAll(FS);localStorage.setItem('p2p_'+myCode,JSON.stringify({files:[...v,...f].map(x=>({name:x.fileName,size:x.size})),ts:Date.now()}))}
-  function getRemote(code){const r=localStorage.getItem('p2p_'+code);if(!r)return null;const d=JSON.parse(r);if(Date.now()-d.ts>3e5){localStorage.removeItem('p2p_'+code);return null}return d.files}
-  async function connectPeer(code){const files=getRemote(code),grid=$('#remoteGrid');grid.innerHTML='';if(!files||!files.length){grid.innerHTML='<p>🔍 Не найдено</p>';return}files.forEach(f=>{const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:8px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;margin-bottom:4px;';d.innerHTML=`<span style="flex:1;">📁 ${f.name}</span><span>💾 ${(f.size/(1024*1024)).toFixed(2)} МБ</span><button class="btn btn-sm btn-accent">⬇️</button>`;d.querySelector('button').addEventListener('click',()=>alert('WebRTC: '+f.name));grid.appendChild(d)})}
-  $('#exportBtn').addEventListener('click',async()=>{const all=[...await getAll(VS),...await getAll(FS)];let t='Список:\n\n';all.forEach(i=>t+=`${i.fileName} — ${(i.size/(1024*1024)).toFixed(2)} МБ\n`);const b=new Blob([t],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='files_list.txt';a.click();if(navigator.share)try{await navigator.share({title:'Список',files:[new File([b],'files_list.txt',{type:'text/plain'})]})}catch(e){}});
-  $('#gallery').addEventListener('click',()=>$('#gallery').classList.remove('show'));
-  $('#copyCode').addEventListener('click',()=>{navigator.clipboard.writeText(myCode);$('#status').textContent='📋 Скопирован'});
-  $('#copyLink').addEventListener('click',async()=>{const l=getShareLink(myCode);await navigator.clipboard.writeText(l);$('#status').textContent='🔗 Скопирована';if(navigator.share)try{await navigator.share({title:'Хранилище',url:l})}catch(e){}});
-  $('#connectBtn').addEventListener('click',async()=>{const c=$('#remoteCode').value.trim().toUpperCase();if(c)await connectPeer(c)});
-  $('#shuffleBtn').addEventListener('click',renderAll);
-  $('#clearLogsBtn').addEventListener('click',()=>{logs.length=0;logCounter=1;renderLogs();updateLogStats()});
-  $('#exportLogsBtn').addEventListener('click',async()=>{let t='Логи\n\n';logs.forEach(l=>t+=`#${l.num} [${l.time}] [${l.type.toUpperCase()}] ${l.msg}\n`);const b=new Blob([t],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='logs.txt';a.click();if(navigator.share)try{await navigator.share({title:'Логи',files:[new File([b],'logs.txt',{type:'text/plain'})]})}catch(e){}});
+window._as = () => {
+  const q = (document.getElementById('aSearch')?.value || '').toLowerCase();
+  renderAUsers(window._au.filter(u => u.login.toLowerCase().includes(q)));
+};
 
-  async function init(){
-    await initFFmpeg();
-    try{await openDB()}catch(e){addLog(LOG.C,'БД не открыта');return}
-    const cutoff=Date.now()-30*24*60*60*1000;
-    for(const s of[VS,FS]){const items=await getAll(s);for(const i of items)if(i.timestamp&&i.timestamp<cutoff)await delItem(s,i.id)}
-    myCode=getCode();$('#myCode').textContent=myCode;$('#shareLink').textContent=getShareLink(myCode);
-    $('#ver').textContent='№2.1.10 V3.5 X5 P2P3 F6 LOG2 G2 PL3 "Beta Test" N25';
-    setupDrop($('#videoDrop'),$('#videoInput'),VS,true);setupDrop($('#fileDrop'),$('#fileInput'),FS,false);
-    updateSettings();await refresh();
-    const ac=new URLSearchParams(location.search).get('code');
-    if(ac)setTimeout(async()=>{$$('.tab').forEach(b=>b.classList.remove('active'));document.querySelector('[data-tab="p2p"]').classList.add('active');$$('.panel').forEach(p=>p.classList.remove('active'));$('#tab-p2p').classList.add('active');$('#remoteCode').value=ac;await connectPeer(ac)},500);
-    setInterval(refresh,3e4);addLog(LOG.S,'Готово');$('#status').textContent='✅ Готово'}
-  window.addEventListener('DOMContentLoaded',init);
+function renderAUsers(users) {
+  const el = document.getElementById('aUsers'); if (!el) return;
+  el.innerHTML = users.map(u => {
+    const w = typeof u.warnings === 'string' ? JSON.parse(u.warnings) : (u.warnings || []);
+    let b = ''; if (u.verified) b += ' <span class="verified-badge">✓</span> '; if (u.banned) b += ' <span style="color:red;">БАН</span> '; if (w.length) b += ' <span style="color:#f59e0b;">⚠'+w.length+'</span> ';
+    return `<div class="row"><span><b>@${u.login}</b>${b}</span><div>
+      <button class="ok vbtn" data-l="${u.login}">${u.verified?'Снять✓':'✓Вериф'}</button>
+      <button class="${u.banned?'ok':'ban'} bbtn" data-l="${u.login}">${u.banned?'Разбан':'Бан'}</button>
+      <button class="wbtn" data-l="${u.login}" style="background:#f59e0b;color:#000;">⚠</button>
+      <button class="del dbtn" data-l="${u.login}">🗑</button></div></div>`;
+  }).join('');
+  
+  el.querySelectorAll('.vbtn').forEach(b => b.onclick = async () => {
+    const u = await api('users?login=eq.' + encodeURIComponent(b.dataset.l));
+    await api('users?login=eq.' + encodeURIComponent(b.dataset.l), 'PATCH', { verified: !u[0].verified });
+    addLog((!u[0].verified?'✅ Вериф':'❌ Снята')+': @'+b.dataset.l); loadAdmin();
+  });
+  el.querySelectorAll('.bbtn').forEach(b => b.onclick = async () => {
+    const u = await api('users?login=eq.' + encodeURIComponent(b.dataset.l));
+    if (u[0].banned) { await api('users?login=eq.' + encodeURIComponent(b.dataset.l), 'PATCH', { banned: false }); addLog('🔓 Разбан: @'+b.dataset.l); }
+    else { const r = prompt('Причина:'); if(!r)return; const d = prompt('Дней (0=навсегда):','0'); if(d===null)return;
+      await api('users?login=eq.' + encodeURIComponent(b.dataset.l), 'PATCH', { banned: true, ban_reason: r, ban_until: parseInt(d)>0?Date.now()+parseInt(d)*86400000:0 }); addLog('🚫 Бан: @'+b.dataset.l); }
+    loadAdmin();
+  });
+  el.querySelectorAll('.wbtn').forEach(b => b.onclick = async () => {
+    const r = prompt('Причина:'); if(!r)return;
+    const u = await api('users?login=eq.' + encodeURIComponent(b.dataset.l));
+    const w = typeof u[0].warnings==='string'?JSON.parse(u[0].warnings):(u[0].warnings||[]);
+    w.push(r); await api('users?login=eq.' + encodeURIComponent(b.dataset.l), 'PATCH', { warnings: JSON.stringify(w) });
+    addLog('⚠ Пред: @'+b.dataset.l); loadAdmin();
+  });
+  el.querySelectorAll('.dbtn').forEach(b => b.onclick = async () => {
+    if(!confirm('Удалить @'+b.dataset.l+'?'))return;
+    const u = await api('users?login=eq.' + encodeURIComponent(b.dataset.l));
+    await api('users?id=eq.'+u[0].id,'DELETE'); addLog('🗑 Удалён: @'+b.dataset.l); loadAdmin();
+  });
+}
+
+function renderAVideos(vids) {
+  const el = document.getElementById('aVideos'); if (!el) return;
+  el.innerHTML = vids.map(v => `<div class="row"><span>🎬 ${v.name||''} · @${v.user_id} ${v.visibility==='private'?'🔒':''}</span><button class="del" data-vid="${v.id}">🗑</button></div>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = async () => {
+    if(!confirm('Удалить?'))return;
+    await api('videos?id=eq.'+b.dataset.vid,'DELETE'); addLog('🗑 Видео #'+b.dataset.vid); loadAdmin();
+  });
+}
+
+// ЧАТ
+async function loadChats() {
+  const cp = document.getElementById('chatPage');
+  cp.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Загрузка...</div>';
+  try {
+    const ms = await api('messages?or=(from_user.eq.'+encodeURIComponent(ME)+',to_user.eq.'+encodeURIComponent(ME)+')');
+    const set = new Set(); ms.forEach(m => { if(m.from_user!==ME)set.add(m.from_user); if(m.to_user!==ME)set.add(m.to_user); });
+    const chats = [...set];
+    if(!chats.length){ cp.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">💬 Нет сообщений</div>'; return; }
+    cp.innerHTML = '';
+    for(const c of chats){
+      const u = await api('users?login=eq.'+encodeURIComponent(c));
+      if(!u.length)continue;
+      const d = document.createElement('div'); d.className = 'chatRow';
+      d.innerHTML = `<div class="chatAv">${(u[0].nickname||c)[0].toUpperCase()}</div><div><b>@${c}</b></div>`;
+      d.onclick = () => openChat(c); cp.appendChild(d);
+    }
+  }catch(e){ cp.innerHTML = '<div style="color:red;">Ошибка</div>'; }
+}
+
+async function openChat(wu){
+  const cp = document.getElementById('chatPage');
+  cp.innerHTML = `<button onclick="loadChats()" style="background:none;border:none;color:#ff0040;font-size:16px;cursor:pointer;margin-bottom:10px;">← Назад</button>
+    <div id="msgBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;"></div>
+    <div id="chatInput"><input id="msgInput" placeholder="Сообщение..."><button id="sendMsg">Отправить</button></div>`;
+  const box = document.getElementById('msgBox');
+  const ms = await api('messages?or=(from_user.eq.'+ME+',to_user.eq.'+ME+')&or=(from_user.eq.'+wu+',to_user.eq.'+wu+')&order=created.asc');
+  ms.forEach(m => { const d = document.createElement('div'); d.className = 'msg '+(m.from_user===ME?'sent':'recv'); d.textContent = m.text; box.appendChild(d); });
+  box.scrollTop = box.scrollHeight;
+  document.getElementById('sendMsg').onclick = async () => {
+    const t = document.getElementById('msgInput').value.trim(); if(!t)return;
+    await api('messages','POST',{ from_user: ME, to_user: wu, text: t, created: new Date().toISOString() });
+    const d = document.createElement('div'); d.className = 'msg sent'; d.textContent = t;
+    box.appendChild(d); document.getElementById('msgInput').value = ''; box.scrollTop = box.scrollHeight;
+  };
+}
+
+// ЗАПУСК
+(async () => {
+  await setupStorage(); await ensureAdmin();
+  const sv = localStorage.getItem('tiktok_user');
+  if(sv){ try {
+    const u = await api('users?login=eq.'+encodeURIComponent(sv));
+    if(u.length && !u[0].banned) enter(u[0]);
+    else { localStorage.removeItem('tiktok_user'); document.getElementById('authScreen').classList.remove('hidden'); }
+  }catch(e){ localStorage.removeItem('tiktok_user'); document.getElementById('authScreen').classList.remove('hidden'); }}
 })();
 </script>
 </body>
