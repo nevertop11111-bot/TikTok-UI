@@ -5,95 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>TikTok UI ☁️</title>
   <style>
-    :root { --bg: #000; --surface: #0a0a0a; --card: #111; --text: #fff; --text2: #888; --accent: #ff0040; --accent2: #00e5ff; --border: #1a1a1a; --green: #22c55e; --orange: #f59e0b; --red: #ff3333; }
-    .theme-light { --bg: #f5f5f5; --surface: #fff; --card: #eee; --text: #111; --text2: #666; --border: #ddd; }
-    .theme-pink { --bg: #1a0010; --surface: #2a0020; --card: #3a0030; --accent: #ff69b4; --accent2: #ff1493; --border: #4a0040; }
-    .theme-blue { --bg: #001020; --surface: #0a1a2a; --card: #1a2a3a; --accent: #4488ff; --accent2: #00aaff; --border: #2a3a4a; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; height: 100vh; overflow: hidden; }
+    body { background: #000; color: #fff; font-family: Arial, sans-serif; height: 100vh; overflow: hidden; }
 
-    #authScreen { position: fixed; inset: 0; background: #000; z-index: 200; display: flex; align-items: center; justify-content: center; }
+    #authScreen { position: fixed; inset: 0; background: #000; z-index: 100; display: flex; align-items: center; justify-content: center; }
     #authScreen.hidden { display: none; }
-    #authBox { background: #111; border-radius: 20px; padding: 30px 25px; width: 90%; max-width: 350px; text-align: center; }
-    #authBox h1 { font-size: 32px; margin-bottom: 5px; }
-    #authBox h1 span { color: var(--accent); }
+    #authBox { background: #111; border-radius: 20px; padding: 30px 20px; width: 90%; max-width: 340px; text-align: center; }
+    #authBox h1 { font-size: 30px; margin-bottom: 5px; }
+    #authBox h1 span { color: #ff0040; }
     #authBox p { color: #888; margin-bottom: 20px; font-size: 14px; }
     #authBox input { width: 100%; padding: 14px; margin: 6px 0; border-radius: 12px; border: 1px solid #222; background: #000; color: #fff; font-size: 16px; outline: none; }
     #authBox button { width: 100%; padding: 14px; margin: 6px 0; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
-    #loginBtn { background: var(--accent); color: #fff; }
-    #registerBtn { background: var(--accent2); color: #000; }
+    #loginBtn { background: #ff0040; color: #fff; }
+    #registerBtn { background: #00e5ff; color: #000; }
     #authError { color: #ff4444; margin-top: 10px; font-size: 14px; min-height: 20px; }
 
-    #app { height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
-    #topBar { height: 50px; background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); }
+    #app { height: 100vh; display: flex; flex-direction: column; }
+    #topBar { height: 50px; background: #0a0a0a; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #1a1a1a; }
     #topBar span { font-weight: bold; font-size: 18px; }
-    #topBar button { background: none; border: 1px solid var(--border); color: var(--text); padding: 7px 15px; border-radius: 15px; font-size: 13px; cursor: pointer; }
+    #topBar button { background: none; border: 1px solid #333; color: #fff; padding: 7px 15px; border-radius: 15px; font-size: 13px; cursor: pointer; }
 
     #content { flex: 1; position: relative; overflow: hidden; }
-    .page { position: absolute; inset: 0; overflow-y: auto; display: none; }
+    .page { position: absolute; inset: 0; overflow-y: auto; display: none; padding-bottom: 70px; }
     .page.active { display: block; }
 
-    #feedPage { overflow-y: scroll; scroll-snap-type: y mandatory; scroll-snap-stop: always; }
-    .vid { width: 100%; height: calc(100vh - 110px); scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+    #feedPage { overflow-y: scroll; scroll-snap-type: y mandatory; }
+    .vid { width: 100%; height: calc(100vh - 120px); scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
     .vid video { width: 100%; height: 100%; object-fit: contain; }
-    .vid .info { position: absolute; bottom: 80px; left: 15px; right: 55px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 12px; }
+    .vid .info { position: absolute; bottom: 20px; left: 15px; right: 55px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 12px; }
     .vid .info .uname { font-weight: bold; font-size: 14px; }
     .vid .info .title { font-size: 12px; color: #ccc; margin-top: 3px; }
-    .vid .info .hashtags { font-size: 11px; color: var(--accent2); margin-top: 3px; }
-    .vid .btns { position: absolute; right: 10px; bottom: 90px; display: flex; flex-direction: column; gap: 15px; }
+    .vid .btns { position: absolute; right: 10px; bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
     .vid .btns button { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
     .vid .btns span { font-size: 11px; display: block; text-align: center; }
     .vid .sound { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .vid .comment-panel { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); max-height: 50%; overflow-y: auto; padding: 15px; border-radius: 16px 16px 0 0; display: none; z-index: 10; }
-    .vid .comment-panel.show { display: block; }
-    .comment-item { padding: 8px 0; border-bottom: 1px solid #222; font-size: 13px; }
-    .comment-item b { color: var(--accent2); }
-    .comment-input { display: flex; gap: 6px; margin-top: 8px; }
-    .comment-input input { flex: 1; padding: 8px; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; font-size: 12px; }
-    .comment-input button { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 8px 12px; cursor: pointer; font-size: 12px; }
 
-    #profilePage { padding: 25px 25px 80px 25px; text-align: center; }
+    #profilePage { padding: 25px; text-align: center; }
     #avatarImg { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #222; cursor: pointer; }
     #profilePage h3 { margin-top: 10px; font-size: 20px; }
-    #profileBio { color: var(--text2); font-size: 13px; margin: 5px 0; }
-    #profilePage .st { color: var(--text2); font-size: 13px; margin: 5px 0 15px; }
-    #profilePage button { display: block; width: 90%; max-width: 300px; margin: 6px auto; padding: 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; cursor: pointer; }
-    .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--green); font-size: 12px; color: #fff; margin-left: 5px; }
-    .achievement-badge { display: inline-block; padding: 4px 10px; margin: 3px; border-radius: 12px; font-size: 11px; background: var(--card); border: 1px solid var(--border); }
-    .achievement-badge.earned { border-color: #ffd700; background: #2a2000; color: #ffd700; }
+    #profilePage .st { color: #888; font-size: 13px; margin: 5px 0 15px; }
+    #profilePage button { display: block; width: 90%; max-width: 300px; margin: 6px auto; padding: 12px; border-radius: 20px; border: 1px solid #333; background: #111; color: #fff; font-size: 14px; cursor: pointer; }
+    .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #22c55e; font-size: 12px; color: #fff; margin-left: 5px; vertical-align: middle; }
 
-    #adminPage { padding: 15px 15px 90px 15px; }
-    #adminPage .stat { display: inline-block; background: var(--card); padding: 12px 16px; border-radius: 12px; margin: 4px; font-size: 13px; text-align: center; }
-    #adminPage .stat b { display: block; font-size: 20px; color: var(--accent); }
-    #adminPage input, #adminPage textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: #fff; margin: 8px 0; font-size: 14px; outline: none; }
-    #adminPage textarea { resize: vertical; min-height: 60px; font-family: inherit; }
-    #adminPage .row { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--card); border-radius: 10px; margin: 4px 0; font-size: 13px; flex-wrap: wrap; gap: 6px; }
-    #adminPage .row button { padding: 5px 12px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: #fff; font-size: 11px; cursor: pointer; }
-    #adminPage .row .del { background: var(--accent); border-color: var(--accent); }
-    #adminPage .row .ban { background: var(--red); border-color: var(--red); }
-    #adminPage .row .ok { background: var(--green); border-color: var(--green); color: #000; }
-    #adminPage .mega-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; margin: 8px 0; color: #fff; }
-    .broadcast-btn { background: linear-gradient(135deg, #ff0040, #ff6600); }
+    #adminPage { padding: 15px; }
+    #adminPage .stat { display: inline-block; background: #111; padding: 12px 16px; border-radius: 12px; margin: 4px; font-size: 13px; text-align: center; }
+    #adminPage .stat b { display: block; font-size: 20px; color: #ff0040; }
+    #adminPage input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #222; background: #000; color: #fff; margin: 8px 0; font-size: 14px; outline: none; }
+    #adminPage .row { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #111; border-radius: 10px; margin: 4px 0; font-size: 13px; flex-wrap: wrap; gap: 6px; }
+    #adminPage .row button { padding: 8px 14px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 12px; cursor: pointer; min-width: 50px; min-height: 38px; }
+    #adminPage .row .del { background: #ff0040; border-color: #ff0040; }
+    #adminPage .row .ban { background: #ff3333; border-color: #ff3333; }
+    #adminPage .row .ok { background: #22c55e; border-color: #22c55e; color: #000; }
 
-    #chatPage { padding: 15px 15px 80px 15px; }
-    .chatRow { display: flex; align-items: center; padding: 12px; background: var(--card); border-radius: 12px; margin: 4px 0; cursor: pointer; }
+    #chatPage { padding: 15px; }
+    .chatRow { display: flex; align-items: center; padding: 12px; background: #111; border-radius: 12px; margin: 4px 0; cursor: pointer; }
     .chatAv { width: 40px; height: 40px; border-radius: 50%; background: #222; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; margin: 3px 0; font-size: 13px; }
-    .msg.sent { background: var(--accent); align-self: flex-end; }
-    .msg.recv { background: var(--card); border: 1px solid var(--border); align-self: flex-start; }
-    #chatInput { display: flex; gap: 8px; padding: 10px; background: var(--surface); position: sticky; bottom: 0; }
-    #chatInput input { flex: 1; padding: 10px; border-radius: 18px; border: 1px solid var(--border); background: #000; color: var(--text); }
-    #chatInput button { background: var(--accent); color: #fff; border: none; border-radius: 18px; padding: 10px 18px; cursor: pointer; font-weight: bold; }
+    .msg.sent { background: #ff0040; align-self: flex-end; }
+    .msg.recv { background: #1a1a1a; border: 1px solid #222; align-self: flex-start; }
+    #chatInput { display: flex; gap: 8px; padding: 10px; background: #0a0a0a; position: sticky; bottom: 0; }
+    #chatInput input { flex: 1; padding: 10px; border-radius: 18px; border: 1px solid #222; background: #000; color: #fff; }
+    #chatInput button { background: #ff0040; color: #fff; border: none; border-radius: 18px; padding: 10px 18px; cursor: pointer; font-weight: bold; }
 
-    #logPage, #historyPage { padding: 10px 10px 80px 10px; }
-    .log-entry, .history-entry { padding: 8px 12px; background: var(--card); border-left: 4px solid var(--accent); margin: 3px 0; border-radius: 4px; font-size: 12px; font-family: monospace; }
-
-    #bottomBar { height: 60px; background: var(--surface); display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border); position: absolute; bottom: 0; left: 0; right: 0; z-index: 20; }
-    #bottomBar .nav { display: flex; flex-direction: column; align-items: center; color: var(--text2); font-size: 11px; cursor: pointer; }
-    #bottomBar .nav.on { color: var(--text); }
+    #bottomBar { height: 60px; background: #0a0a0a; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #1a1a1a; position: absolute; bottom: 0; left: 0; right: 0; z-index: 20; }
+    #bottomBar .nav { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 11px; cursor: pointer; }
+    #bottomBar .nav.on { color: #fff; }
     #bottomBar .nav .ico { font-size: 22px; }
 
-    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 10px 20px; border-radius: 20px; z-index: 99; font-weight: bold; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #ff0040; color: #fff; padding: 10px 20px; border-radius: 20px; z-index: 99; font-weight: bold; font-size: 14px; opacity: 0; transition: opacity 0.3s; }
     #toast.show { opacity: 1; }
   </style>
 </head>
@@ -115,306 +94,690 @@
   <div id="topBar"><span>TikTok UI</span><button id="logoutBtn">Выйти</button></div>
   <div id="content">
     <div id="feedPage" class="page active"></div>
-    <div id="historyPage" class="page"></div>
     <div id="chatPage" class="page"></div>
     <div id="profilePage" class="page">
       <img id="avatarImg" src=""><input type="file" id="avatarFile" accept="image/*" hidden>
-      <h3 id="profileName"></h3><p id="profileBio"></p>
-      <div id="achievementsContainer"></div>
-      <div class="st" id="profileStats"></div>
-      <button id="editBioBtn">📝 Описание</button>
-      <button id="chNickBtn">✏️ Ник</button>
-      <button id="chPassBtn">🔒 Пароль</button>
+      <h3 id="profileName"></h3><div class="st" id="profileStats"></div>
+      <button id="chNickBtn">✏️ Изменить ник</button>
+      <button id="chPassBtn">🔒 Изменить пароль</button>
       <button id="uploadBtn">📤 Загрузить видео</button>
       <input type="file" id="videoFile" accept="video/*" hidden>
-      <button id="visibilityBtn" style="background:var(--green);color:#fff;">🌍 Видимость: Для всех</button>
-      <button id="promoCodeBtn">🎁 Промокод</button>
-      <div id="uploadStatus" style="color:var(--text2);margin-top:8px;"></div>
+      <button id="visibilityBtn" style="background:#22c55e;color:#fff;border:none;">🌍 Видимость: Для всех</button>
+      <div id="uploadStatus" style="color:#888;margin-top:8px;"></div>
     </div>
     <div id="adminPage" class="page"></div>
-    <div id="logPage" class="page"></div>
   </div>
   <div id="bottomBar">
     <div class="nav on" data-p="feedPage"><span class="ico">🏠</span>Главная</div>
-    <div class="nav" data-p="historyPage"><span class="ico">🕐</span>История</div>
     <div class="nav" data-p="chatPage"><span class="ico">💬</span>Чаты</div>
     <div class="nav" data-p="profilePage"><span class="ico">👤</span>Профиль</div>
     <div class="nav" id="adminNav" data-p="adminPage" style="display:none;"><span class="ico">🛡️</span>Админ</div>
-    <div class="nav" data-p="logPage"><span class="ico">📋</span>Логи</div>
   </div>
 </div>
 <div id="toast"></div>
 
 <script>
-// НАСТРОЙКИ
+// НАСТРОЙКИ ОБЛАКА
 const URL = 'https://gtyjjzmvdhglxfjrwejh.supabase.co';
 const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0eWpqem12ZGhnbHhmanJ3ZWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNDc1NjMsImV4cCI6MjEwMTYyMzU2M30.8KOimAzsQbj5xPukQswdW05dvW5sat3xvyfxB44_J5Y';
 
-let ME='', ADMIN=false, SOUND=false, MY_VISIBILITY='all';
-let UPLOAD_COUNT=0, UPLOAD_RESET=0, PROMO_LIMIT=0;
-const LOGS=[], HISTORY=[];
-const BANNED_WORDS=['мат','хуй','пизда','ебал','сука','блядь','fuck','shit'];
-let MY_ACHIEVEMENTS=[];
+let ME = '';
+let ADMIN = false;
+let SOUND = false;
+let MY_VISIBILITY = 'all';
 
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
-function addLog(msg){const d=new Date();LOGS.push({time:d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),msg});if(LOGS.length>100)LOGS.shift();}
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
 
-async function api(path,method='GET',body=null){
-  const h={'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY};
-  const o={method,headers:h};if(body)o.body=JSON.stringify(body);
-  const r=await fetch(URL+'/rest/v1/'+path,o);const t=await r.text();
-  if(!r.ok){console.error('❌',method,path,t);throw new Error(t);}
-  return t?JSON.parse(t):[];
+// ЗАПРОС К БАЗЕ ДАННЫХ
+async function api(path, method, body) {
+  method = method || 'GET';
+  var h = {
+    'Content-Type': 'application/json',
+    apikey: KEY,
+    Authorization: 'Bearer ' + KEY
+  };
+  var o = { method: method, headers: h };
+  if (body) { o.body = JSON.stringify(body); }
+  var r = await fetch(URL + '/rest/v1/' + path, o);
+  var t = await r.text();
+  if (!r.ok) { throw new Error(t); }
+  if (t) { return JSON.parse(t); }
+  return [];
 }
 
 // НАВИГАЦИЯ
-document.querySelectorAll('#bottomBar .nav').forEach(n=>n.onclick=()=>{
-  document.querySelectorAll('#bottomBar .nav').forEach(x=>x.classList.remove('on'));
-  n.classList.add('on');
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const id=n.dataset.p;document.getElementById(id).classList.add('active');
-  if(id==='feedPage')loadFeed();if(id==='chatPage')loadChats();
-  if(id==='profilePage')loadProfile();if(id==='adminPage')loadAdmin();
-  if(id==='historyPage')renderHistory();if(id==='logPage')renderLogs();
-});
+var navs = document.querySelectorAll('#bottomBar .nav');
+for (var i = 0; i < navs.length; i++) {
+  navs[i].onclick = function() {
+    var allNavs = document.querySelectorAll('#bottomBar .nav');
+    for (var j = 0; j < allNavs.length; j++) { allNavs[j].classList.remove('on'); }
+    this.classList.add('on');
+    
+    var allPages = document.querySelectorAll('.page');
+    for (var k = 0; k < allPages.length; k++) { allPages[k].classList.remove('active'); }
+    
+    var panelId = this.getAttribute('data-p');
+    document.getElementById(panelId).classList.add('active');
+    
+    if (panelId === 'feedPage') { loadFeed(); }
+    if (panelId === 'chatPage') { loadChats(); }
+    if (panelId === 'profilePage') { loadProfile(); }
+    if (panelId === 'adminPage') { loadAdmin(); }
+  };
+}
 
-function renderLogs(){document.getElementById('logPage').innerHTML=LOGS.map(l=>`<div class="log-entry">${l.time} ${l.msg}</div>`).join('');}
-function renderHistory(){document.getElementById('historyPage').innerHTML=HISTORY.length?HISTORY.map(v=>`<div class="history-entry">🎬 ${v.name} · @${v.user_id}</div>`).join(''):'<div style="color:#888;padding:20px;">Пусто</div>';}
-
-// АДМИН
-async function ensureAdmin(){
-  const u=await api('users?login=eq.Grustish');
-  if(!u.length){await api('users','POST',{login:'Grustish',password:'Grusti01',nickname:'Grustish Admin',avatar:'',role:'admin',verified:true,banned:false,ban_reason:'',ban_until:0,warnings:'[]',visibility:'all',bio:'',link:'',achievements:'[]',coins:0,upload_count:0,upload_reset:0,promo_limit:0,created:new Date().toISOString()});addLog('👑 Админ создан');}
-  else if(!u[0].verified||u[0].role!=='admin'){await api('users?login=eq.Grustish','PATCH',{role:'admin',verified:true});}
+// СОЗДАТЬ АДМИНА
+async function createAdmin() {
+  var users = await api('users?login=eq.Grustish');
+  if (users.length === 0) {
+    await api('users', 'POST', {
+      login: 'Grustish',
+      password: 'Grusti01',
+      nickname: 'Grustish Admin',
+      avatar: '',
+      role: 'admin',
+      verified: true,
+      banned: false,
+      ban_reason: '',
+      ban_until: 0,
+      warnings: '[]',
+      visibility: 'all',
+      created: new Date().toISOString()
+    });
+  }
 }
 
 // ВХОД
-document.getElementById('loginBtn').onclick=async()=>{
-  const l=document.getElementById('loginInput').value.trim(),p=document.getElementById('passInput').value.trim();
-  if(!l||!p)return document.getElementById('authError').textContent='Заполните поля';
-  try{
-    const u=await api('users?login=eq.'+encodeURIComponent(l));
-    if(!u.length)return document.getElementById('authError').textContent='Пользователь не найден';
-    if(u[0].banned)return document.getElementById('authError').textContent='🚫 Забанен';
-    if(u[0].password!==p)return document.getElementById('authError').textContent='Неверный пароль';
-    enter(u[0]);
-  }catch(e){document.getElementById('authError').textContent='Ошибка';}
+document.getElementById('loginBtn').onclick = async function() {
+  var l = document.getElementById('loginInput').value.trim();
+  var p = document.getElementById('passInput').value.trim();
+  
+  if (!l || !p) {
+    document.getElementById('authError').textContent = 'Заполните поля';
+    return;
+  }
+  
+  try {
+    var users = await api('users?login=eq.' + encodeURIComponent(l));
+    if (users.length === 0) {
+      document.getElementById('authError').textContent = 'Пользователь не найден';
+      return;
+    }
+    var user = users[0];
+    if (user.banned) {
+      document.getElementById('authError').textContent = 'Вы забанены';
+      return;
+    }
+    if (user.password !== p) {
+      document.getElementById('authError').textContent = 'Неверный пароль';
+      return;
+    }
+    enter(user);
+  } catch (e) {
+    document.getElementById('authError').textContent = 'Ошибка';
+  }
 };
 
 // РЕГИСТРАЦИЯ
-document.getElementById('registerBtn').onclick=async()=>{
-  const l=document.getElementById('loginInput').value.trim(),p=document.getElementById('passInput').value.trim();
-  if(!l||!p)return document.getElementById('authError').textContent='Заполните';
-  if(l.length<2)return document.getElementById('authError').textContent='Логин короткий';
-  if(p.length<3)return document.getElementById('authError').textContent='Пароль короткий';
-  for(const w of BANNED_WORDS){if(l.toLowerCase().includes(w))return document.getElementById('authError').textContent='🚫 Запрещённое слово';}
-  try{
-    const exist=await api('users?login=eq.'+encodeURIComponent(l));
-    if(exist.length)return document.getElementById('authError').textContent='Занят';
-    await api('users','POST',{login:l,password:p,nickname:l,avatar:'',role:'user',verified:false,banned:false,ban_reason:'',ban_until:0,warnings:'[]',visibility:'all',bio:'',link:'',achievements:'[]',coins:0,upload_count:0,upload_reset:0,promo_limit:0,created:new Date().toISOString()});
-    addLog('✅ Регистрация: @'+l);toast('✅ Создан!');
-    enter({login:l,role:'user',verified:false,warnings:[],visibility:'all',bio:'',link:'',achievements:[],coins:0,upload_count:0,upload_reset:0,promo_limit:0});
-  }catch(e){document.getElementById('authError').textContent='Ошибка';}
+document.getElementById('registerBtn').onclick = async function() {
+  var l = document.getElementById('loginInput').value.trim();
+  var p = document.getElementById('passInput').value.trim();
+  
+  if (!l || !p) {
+    document.getElementById('authError').textContent = 'Заполните поля';
+    return;
+  }
+  if (l.length < 2) {
+    document.getElementById('authError').textContent = 'Логин короткий';
+    return;
+  }
+  if (p.length < 3) {
+    document.getElementById('authError').textContent = 'Пароль короткий';
+    return;
+  }
+  
+  try {
+    var exist = await api('users?login=eq.' + encodeURIComponent(l));
+    if (exist.length > 0) {
+      document.getElementById('authError').textContent = 'Логин занят';
+      return;
+    }
+    
+    await api('users', 'POST', {
+      login: l,
+      password: p,
+      nickname: l,
+      avatar: '',
+      role: 'user',
+      verified: false,
+      banned: false,
+      ban_reason: '',
+      ban_until: 0,
+      warnings: '[]',
+      visibility: 'all',
+      created: new Date().toISOString()
+    });
+    
+    toast('✅ Аккаунт создан!');
+    enter({ login: l, role: 'user', verified: false, warnings: [], visibility: 'all' });
+  } catch (e) {
+    document.getElementById('authError').textContent = 'Ошибка';
+  }
 };
 
-function enter(u){
-  ME=u.login;ADMIN=u.role==='admin';MY_VISIBILITY=u.visibility||'all';
-  UPLOAD_COUNT=u.upload_count||0;UPLOAD_RESET=u.upload_reset||0;PROMO_LIMIT=u.promo_limit||0;
-  MY_ACHIEVEMENTS=typeof u.achievements==='string'?JSON.parse(u.achievements):(u.achievements||[]);
-  if(Date.now()>UPLOAD_RESET){UPLOAD_COUNT=0;UPLOAD_RESET=Date.now()+3600000;}
-  localStorage.setItem('tiktok_user',ME);
+function enter(user) {
+  ME = user.login;
+  ADMIN = (user.role === 'admin');
+  MY_VISIBILITY = user.visibility || 'all';
+  
+  localStorage.setItem('tiktok_user', ME);
   document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('adminNav').style.display=ADMIN?'flex':'none';
-  addLog('🔑 Вход: @'+ME+(ADMIN?' [АДМИН]':''));
-  loadFeed();loadProfile();toast('👋 @'+ME+'!');
+  
+  if (ADMIN) {
+    document.getElementById('adminNav').style.display = 'flex';
+  } else {
+    document.getElementById('adminNav').style.display = 'none';
+  }
+  
+  loadFeed();
+  loadProfile();
+  toast('👋 Привет, @' + ME + '!');
 }
 
-document.getElementById('logoutBtn').onclick=()=>{addLog('🚪 Выход');localStorage.removeItem('tiktok_user');location.reload();};
+document.getElementById('logoutBtn').onclick = function() {
+  localStorage.removeItem('tiktok_user');
+  location.reload();
+};
 
 // ЛЕНТА
-async function loadFeed(){
-  const fp=document.getElementById('feedPage');fp.innerHTML='<div style="text-align:center;padding:40px;">Загрузка...</div>';
-  try{
-    let vids=await api('videos?select=*');
-    vids=vids.filter(v=>v.visibility==='all'||v.user_id===ME);
-    if(!vids.length){fp.innerHTML='<div style="text-align:center;padding:40px;">📹 Нет видео</div>';return;}
-    fp.innerHTML='';vids.sort(()=>Math.random()-0.5);
-    vids.forEach(v=>{
-      const d=document.createElement('div');d.className='vid';
-      const canDel=(v.user_id===ME)||ADMIN;
-      d.innerHTML=`<video src="${v.url}" loop playsinline muted></video><div class="sound">🔇</div>
-        <div class="info"><div class="uname">@${v.user_id}</div><div class="title">${v.name||''}</div><div class="hashtags">${v.hashtags||''}</div></div>
-        <div class="btns"><button class="lk">❤️<span>${v.likes||0}</span></button><button class="cmt">💬</button>${canDel?'<button class="dl">🗑️</button>':''}</div>
-        <div class="comment-panel" id="cmts-${v.id}"><div id="clist-${v.id}"></div><div class="comment-input"><input id="cin-${v.id}" placeholder="Комментарий..."><button id="cs-${v.id}">Отпр</button></div></div>`;
-      const vid=d.querySelector('video'),snd=d.querySelector('.sound');
-      new IntersectionObserver(([e])=>{if(e.isIntersecting){vid.muted=!SOUND;snd.textContent=SOUND?'🔊':'🔇';vid.play().catch(()=>{});HISTORY.unshift(v);if(HISTORY.length>30)HISTORY.pop();}else{vid.muted=true;snd.textContent='🔇';vid.pause();}},{threshold:0.7}).observe(d);
-      snd.onclick=e=>{e.stopPropagation();SOUND=!SOUND;vid.muted=!SOUND;snd.textContent=SOUND?'🔊':'🔇';if(SOUND)vid.play().catch(()=>{});};
-      d.querySelector('.lk').onclick=async e=>{e.stopPropagation();const nl=(v.likes||0)+1;d.querySelector('.lk span').textContent=nl;await api('videos?id=eq.'+v.id,'PATCH',{likes:nl});checkAchievements();};
-      d.querySelector('.cmt').onclick=e=>{e.stopPropagation();const cp=document.getElementById('cmts-'+v.id);cp.classList.toggle('show');if(cp.classList.contains('show'))loadComments(v.id);};
-      const dl=d.querySelector('.dl');if(dl)dl.onclick=async e=>{e.stopPropagation();if(!confirm('Удалить?'))return;await api('videos?id=eq.'+v.id,'DELETE');addLog('🗑️ Удалено');toast('🗑️ Удалено');loadFeed();};
-      fp.appendChild(d);
-    });
-  }catch(e){fp.innerHTML='<div style="text-align:center;padding:40px;">Ошибка</div>';}
-}
-
-async function loadComments(vidId){
-  const list=document.getElementById('clist-'+vidId);list.innerHTML='...';
-  const cmts=await api('comments?video_id=eq.'+vidId+'&order=created.asc');
-  list.innerHTML=cmts.map(c=>`<div class="comment-item"><b>@${c.user_id}</b> ${c.text}</div>`).join('');
-  document.getElementById('cs-'+vidId).onclick=async()=>{
-    const t=document.getElementById('cin-'+vidId).value.trim();if(!t)return;
-    for(const w of BANNED_WORDS){if(t.toLowerCase().includes(w))return toast('🚫 Запрещённое слово');}
-    await api('comments','POST',{video_id:vidId,user_id:ME,text:t,created:new Date().toISOString()});
-    document.getElementById('cin-'+vidId).value='';loadComments(vidId);
-  };
+async function loadFeed() {
+  var fp = document.getElementById('feedPage');
+  fp.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Загрузка...</div>';
+  
+  try {
+    var allVids = await api('videos?select=*');
+    
+    // Фильтруем: только публичные ИЛИ свои
+    var vids = [];
+    for (var i = 0; i < allVids.length; i++) {
+      var v = allVids[i];
+      if (v.visibility === 'all' || v.user_id === ME) {
+        vids.push(v);
+      }
+    }
+    
+    if (vids.length === 0) {
+      fp.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">📹 Нет видео. Загрузите первое!</div>';
+      return;
+    }
+    
+    fp.innerHTML = '';
+    
+    // Перемешиваем
+    vids.sort(function() { return Math.random() - 0.5; });
+    
+    for (var i = 0; i < vids.length; i++) {
+      var v = vids[i];
+      var canDel = (v.user_id === ME) || ADMIN;
+      
+      var div = document.createElement('div');
+      div.className = 'vid';
+      
+      var html = '<video src="' + v.url + '" loop playsinline muted></video>';
+      html += '<div class="sound">🔇</div>';
+      html += '<div class="info"><div class="uname">@' + v.user_id + '</div><div class="title">' + (v.name || '') + '</div></div>';
+      html += '<div class="btns"><button class="like-btn">❤️<span>' + (v.likes || 0) + '</span></button>';
+      if (canDel) { html += '<button class="del-btn">🗑️</button>'; }
+      html += '</div>';
+      
+      div.innerHTML = html;
+      
+      var video = div.querySelector('video');
+      var soundBtn = div.querySelector('.sound');
+      
+      // Автовоспроизведение
+      var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          video.muted = !SOUND;
+          soundBtn.textContent = SOUND ? '🔊' : '🔇';
+          video.play().catch(function() {});
+        } else {
+          video.muted = true;
+          soundBtn.textContent = '🔇';
+          video.pause();
+        }
+      }, { threshold: 0.7 });
+      observer.observe(div);
+      
+      // Кнопка звука
+      soundBtn.onclick = function(e) {
+        e.stopPropagation();
+        SOUND = !SOUND;
+        video.muted = !SOUND;
+        soundBtn.textContent = SOUND ? '🔊' : '🔇';
+        if (SOUND) { video.play().catch(function() {}); }
+      };
+      
+      // Лайк
+      div.querySelector('.like-btn').onclick = async function(e) {
+        e.stopPropagation();
+        var nl = (v.likes || 0) + 1;
+        div.querySelector('.like-btn span').textContent = nl;
+        await api('videos?id=eq.' + v.id, 'PATCH', { likes: nl });
+      };
+      
+      // Удаление
+      var delBtn = div.querySelector('.del-btn');
+      if (delBtn) {
+        delBtn.onclick = async function(e) {
+          e.stopPropagation();
+          if (!confirm('Удалить видео?')) { return; }
+          await api('videos?id=eq.' + v.id, 'DELETE');
+          toast('🗑️ Видео удалено');
+          loadFeed();
+        };
+      }
+      
+      fp.appendChild(div);
+    }
+  } catch (e) {
+    fp.innerHTML = '<div style="text-align:center;padding:40px;color:red;">Ошибка загрузки</div>';
+  }
 }
 
 // ПРОФИЛЬ
-async function loadProfile(){
-  const u=await api('users?login=eq.'+encodeURIComponent(ME));if(!u.length)return;
-  const user=u[0];MY_VISIBILITY=user.visibility||'all';UPLOAD_COUNT=user.upload_count||0;PROMO_LIMIT=user.promo_limit||0;
-  MY_ACHIEVEMENTS=typeof user.achievements==='string'?JSON.parse(user.achievements):(user.achievements||[]);
-  document.getElementById('avatarImg').src=user.avatar||'';
-  let nm='@'+ME;if(user.verified)nm+=' <span class="verified-badge">✓</span>';
-  const w=typeof user.warnings==='string'?JSON.parse(user.warnings):(user.warnings||[]);
-  if(w.length)nm+=' <span style="background:#f59e0b;color:#000;border-radius:8px;padding:1px 6px;font-size:11px;">⚠'+w.length+'</span>';
-  document.getElementById('profileName').innerHTML=nm;
-  document.getElementById('profileBio').textContent=user.bio||'';
-  document.getElementById('achievementsContainer').innerHTML=MY_ACHIEVEMENTS.map(a=>`<span class="achievement-badge earned">⭐ ${a}</span>`).join('');
-  const vids=await api('videos?select=*');const mv=vids.filter(v=>v.user_id===ME);
-  const flr=await api('follows?following=eq.'+encodeURIComponent(ME));
-  document.getElementById('profileStats').textContent='📹 '+mv.length+' · 👥 '+flr.length+' · 🪙 '+(user.coins||0);
-  const vb=document.getElementById('visibilityBtn');
-  vb.textContent=MY_VISIBILITY==='private'?'🔒 Видимость: Только я':'🌍 Видимость: Для всех';
-  vb.style.background=MY_VISIBILITY==='private'?'var(--red)':'var(--green)';
-  ADMIN=user.role==='admin';document.getElementById('adminNav').style.display=ADMIN?'flex':'none';
+async function loadProfile() {
+  try {
+    var users = await api('users?login=eq.' + encodeURIComponent(ME));
+    if (users.length === 0) { return; }
+    var user = users[0];
+    
+    MY_VISIBILITY = user.visibility || 'all';
+    
+    document.getElementById('avatarImg').src = user.avatar || '';
+    
+    var nm = '@' + ME;
+    if (user.verified) {
+      nm += ' <span class="verified-badge">✓</span>';
+    }
+    var warns = [];
+    try { warns = JSON.parse(user.warnings || '[]'); } catch(e) { warns = []; }
+    if (warns.length > 0) {
+      nm += ' <span style="background:#f59e0b;color:#000;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px;">⚠' + warns.length + '</span>';
+    }
+    document.getElementById('profileName').innerHTML = nm;
+    
+    var allVids = await api('videos?select=*');
+    var myVids = allVids.filter(function(v) { return v.user_id === ME; });
+    var flr = await api('follows?following=eq.' + encodeURIComponent(ME));
+    var flg = await api('follows?follower=eq.' + encodeURIComponent(ME));
+    document.getElementById('profileStats').textContent = '📹 ' + myVids.length + ' видео · 👥 ' + flr.length + ' подп. · 🔔 ' + flg.length + ' подписок';
+    
+    var vb = document.getElementById('visibilityBtn');
+    if (MY_VISIBILITY === 'private') {
+      vb.textContent = '🔒 Видимость: Только я';
+      vb.style.background = '#ff3333';
+    } else {
+      vb.textContent = '🌍 Видимость: Для всех';
+      vb.style.background = '#22c55e';
+    }
+    
+    ADMIN = (user.role === 'admin');
+    if (ADMIN) {
+      document.getElementById('adminNav').style.display = 'flex';
+    } else {
+      document.getElementById('adminNav').style.display = 'none';
+    }
+  } catch (e) {}
 }
 
-document.getElementById('visibilityBtn').onclick=async()=>{
-  const nv=MY_VISIBILITY==='all'?'private':'all';
-  await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{visibility:nv});
-  const mv=await api('videos?user_id=eq.'+encodeURIComponent(ME));
-  for(const v of mv)await api('videos?id=eq.'+v.id,'PATCH',{visibility:nv});
-  MY_VISIBILITY=nv;loadProfile();loadFeed();
-};
-document.getElementById('editBioBtn').onclick=async()=>{const b=prompt('Описание:');if(b!==null){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{bio:b});loadProfile();}};
-document.getElementById('avatarImg').onclick=()=>document.getElementById('avatarFile').click();
-document.getElementById('avatarFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{avatar:ev.target.result});document.getElementById('avatarImg').src=ev.target.result;};r.readAsDataURL(f);};
-document.getElementById('uploadBtn').onclick=()=>document.getElementById('videoFile').click();
-document.getElementById('videoFile').onchange=async e=>{
-  const f=e.target.files[0];if(!f)return;
-  const limit=PROMO_LIMIT>0?PROMO_LIMIT:5;
-  if(UPLOAD_COUNT>=limit)return document.getElementById('uploadStatus').textContent='⚠️ Лимит '+UPLOAD_COUNT+'/'+limit;
-  document.getElementById('uploadStatus').textContent='⏳ Загрузка...';
-  try{
-    const fn=Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
-    await fetch(URL+'/storage/v1/object/tiktok-videos/'+fn,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':f.type||'video/mp4'},body:f});
-    const vurl=URL+'/storage/v1/object/public/tiktok-videos/'+fn;
-    const ht=prompt('Хештеги (через пробел):','')||'';
-    await api('videos','POST',{user_id:ME,name:f.name,url:vurl,duration:0,likes:0,views:0,comments:0,visibility:MY_VISIBILITY,hashtags:ht,pinned:false,filter:'',scheduled:null,created:new Date().toISOString()});
-    UPLOAD_COUNT++;await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{upload_count:UPLOAD_COUNT,upload_reset:UPLOAD_RESET||Date.now()+3600000});
-    document.getElementById('uploadStatus').textContent='✅ Готово!';toast('📤 Загружено!');
-    document.getElementById('videoFile').value='';loadFeed();loadProfile();checkAchievements();
-    setTimeout(()=>document.getElementById('uploadStatus').textContent='',3000);
-  }catch(er){document.getElementById('uploadStatus').textContent='❌ Ошибка';}
-};
-document.getElementById('chNickBtn').onclick=async()=>{const u=await api('users?login=eq.'+encodeURIComponent(ME));const nn=prompt('Ник:',u[0]?.nickname||ME);if(nn&&nn.trim()){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{nickname:nn.trim()});loadProfile();}};
-document.getElementById('chPassBtn').onclick=async()=>{const u=await api('users?login=eq.'+encodeURIComponent(ME));const op=prompt('Старый пароль:');if(u[0]?.password!==op)return toast('❌ Неверно');const np=prompt('Новый пароль:');if(np&&np.length>=3){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{password:np});toast('🔒 Готово');}};
-document.getElementById('promoCodeBtn').onclick=async()=>{
-  const code=prompt('Промокод:','');if(!code)return;
-  const promos=await api('promocodes?code=eq.'+encodeURIComponent(code));
-  if(!promos.length||promos[0].used>=promos[0].max_uses)return toast('❌ Недействителен');
-  await api('promocodes?id=eq.'+promos[0].id,'PATCH',{used:promos[0].used+1});
-  PROMO_LIMIT=promos[0].extra_uploads||0;UPLOAD_COUNT=0;
-  const coins=(await api('users?login=eq.'+encodeURIComponent(ME)))[0].coins+(promos[0].coins||0);
-  await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{promo_limit:PROMO_LIMIT,upload_count:0,coins});
-  toast('✅ Промокод активирован!');loadProfile();loadFeed();
+// КНОПКА ВИДИМОСТИ
+document.getElementById('visibilityBtn').onclick = async function() {
+  var nv = (MY_VISIBILITY === 'all') ? 'private' : 'all';
+  await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { visibility: nv });
+  
+  var myVids = await api('videos?user_id=eq.' + encodeURIComponent(ME));
+  for (var i = 0; i < myVids.length; i++) {
+    await api('videos?id=eq.' + myVids[i].id, 'PATCH', { visibility: nv });
+  }
+  
+  MY_VISIBILITY = nv;
+  loadProfile();
+  loadFeed();
+  toast(nv === 'all' ? '🌍 Видео видны всем' : '🔒 Видео только для вас');
 };
 
-async function checkAchievements(){
-  const u=await api('users?login=eq.'+encodeURIComponent(ME));if(!u.length)return;
-  const vids=await api('videos?user_id=eq.'+encodeURIComponent(ME));
-  const likes=vids.reduce((s,v)=>s+(v.likes||0),0);
-  const flr=await api('follows?follower=eq.'+encodeURIComponent(ME));
-  let ach=typeof u[0].achievements==='string'?JSON.parse(u[0].achievements):(u[0].achievements||[]);
-  let changed=false;
-  if(vids.length>=1&&!ach.includes('first_video')){ach.push('first_video');changed=true;}
-  if(vids.length>=10&&!ach.includes('ten_videos')){ach.push('ten_videos');changed=true;}
-  if(likes>=50&&!ach.includes('fifty_likes')){ach.push('fifty_likes');changed=true;}
-  if(likes>=100&&!ach.includes('hundred_likes')){ach.push('hundred_likes');changed=true;}
-  if(flr.length>=1&&!ach.includes('first_follower')){ach.push('first_follower');changed=true;}
-  if(u[0].verified&&!ach.includes('verified_creator')){ach.push('verified_creator');changed=true;}
-  if(changed){await api('users?login=eq.'+encodeURIComponent(ME),'PATCH',{achievements:JSON.stringify(ach)});MY_ACHIEVEMENTS=ach;toast('🏆 Достижение!');loadProfile();}
-}
+// АВАТАР
+document.getElementById('avatarImg').onclick = function() {
+  document.getElementById('avatarFile').click();
+};
+document.getElementById('avatarFile').onchange = async function(e) {
+  var f = e.target.files[0];
+  if (!f) { return; }
+  var reader = new FileReader();
+  reader.onload = async function(ev) {
+    await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { avatar: ev.target.result });
+    document.getElementById('avatarImg').src = ev.target.result;
+    toast('🖼️ Аватар обновлён');
+  };
+  reader.readAsDataURL(f);
+};
+
+// ЗАГРУЗКА ВИДЕО
+document.getElementById('uploadBtn').onclick = function() {
+  document.getElementById('videoFile').click();
+};
+document.getElementById('videoFile').onchange = async function(e) {
+  var f = e.target.files[0];
+  if (!f) { return; }
+  
+  document.getElementById('uploadStatus').textContent = '⏳ Загрузка...';
+  
+  try {
+    var fn = Date.now() + '_' + f.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    
+    // Загружаем в Storage
+    await fetch(URL + '/storage/v1/object/tiktok-videos/' + fn, {
+      method: 'POST',
+      headers: {
+        apikey: KEY,
+        Authorization: 'Bearer ' + KEY,
+        'Content-Type': f.type || 'video/mp4'
+      },
+      body: f
+    });
+    
+    var vurl = URL + '/storage/v1/object/public/tiktok-videos/' + fn;
+    
+    // Сохраняем в базу
+    await api('videos', 'POST', {
+      user_id: ME,
+      name: f.name,
+      url: vurl,
+      duration: 0,
+      likes: 0,
+      views: 0,
+      comments: 0,
+      visibility: MY_VISIBILITY,
+      created: new Date().toISOString()
+    });
+    
+    document.getElementById('uploadStatus').textContent = '✅ Готово!';
+    toast('📤 Видео загружено!');
+    document.getElementById('videoFile').value = '';
+    loadFeed();
+    loadProfile();
+    setTimeout(function() { document.getElementById('uploadStatus').textContent = ''; }, 3000);
+  } catch (er) {
+    document.getElementById('uploadStatus').textContent = '❌ Ошибка загрузки';
+  }
+};
+
+// НИК
+document.getElementById('chNickBtn').onclick = async function() {
+  var users = await api('users?login=eq.' + encodeURIComponent(ME));
+  var nn = prompt('Новый ник:', users[0] ? users[0].nickname : ME);
+  if (nn && nn.trim()) {
+    await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { nickname: nn.trim() });
+    toast('✏️ Ник изменён');
+    loadProfile();
+  }
+};
+
+// ПАРОЛЬ
+document.getElementById('chPassBtn').onclick = async function() {
+  var users = await api('users?login=eq.' + encodeURIComponent(ME));
+  if (users.length === 0) { return; }
+  var op = prompt('Старый пароль:');
+  if (users[0].password !== op) {
+    toast('❌ Неверный пароль');
+    return;
+  }
+  var np = prompt('Новый пароль (мин. 3 символа):');
+  if (np && np.length >= 3) {
+    await api('users?login=eq.' + encodeURIComponent(ME), 'PATCH', { password: np });
+    toast('🔒 Пароль изменён');
+  }
+};
 
 // ЧАТ
-async function loadChats(){
-  const cp=document.getElementById('chatPage');cp.innerHTML='<div style="padding:30px;">...</div>';
-  const ms=await api('messages?or=(from_user.eq.'+encodeURIComponent(ME)+',to_user.eq.'+encodeURIComponent(ME)+')');
-  const set=new Set();ms.forEach(m=>{if(m.from_user!==ME)set.add(m.from_user);if(m.to_user!==ME)set.add(m.to_user);});
-  const chats=[...set];if(!chats.length){cp.innerHTML='<div style="padding:30px;color:#888;">Нет чатов</div>';return;}
-  cp.innerHTML='';
-  for(const c of chats){const u=await api('users?login=eq.'+encodeURIComponent(c));if(!u.length)continue;const d=document.createElement('div');d.className='chatRow';d.innerHTML=`<div class="chatAv">${(u[0].nickname||c)[0].toUpperCase()}</div><div><b>@${c}</b></div>`;d.onclick=()=>openChat(c);cp.appendChild(d);}
-}
-async function openChat(wu){
-  const cp=document.getElementById('chatPage');
-  cp.innerHTML=`<button onclick="loadChats()" style="background:none;border:none;color:var(--accent);cursor:pointer;margin-bottom:10px;">← Назад</button><div id="msgBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;"></div><div id="chatInput"><input id="msgInput" placeholder="Сообщение..."><button id="sendMsg">Отпр</button></div>`;
-  const box=document.getElementById('msgBox');
-  const ms=await api('messages?or=(from_user.eq.'+ME+',to_user.eq.'+ME+')&or=(from_user.eq.'+wu+',to_user.eq.'+wu+')&order=created.asc');
-  ms.forEach(m=>{const d=document.createElement('div');d.className='msg '+(m.from_user===ME?'sent':'recv');d.textContent=m.text;box.appendChild(d);});
-  box.scrollTop=box.scrollHeight;
-  document.getElementById('sendMsg').onclick=async()=>{const t=document.getElementById('msgInput').value.trim();if(!t)return;await api('messages','POST',{from_user:ME,to_user:wu,text:t,created:new Date().toISOString()});const d=document.createElement('div');d.className='msg sent';d.textContent=t;box.appendChild(d);document.getElementById('msgInput').value='';box.scrollTop=box.scrollHeight;};
+async function loadChats() {
+  var cp = document.getElementById('chatPage');
+  cp.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Загрузка...</div>';
+  
+  try {
+    var msgs = await api('messages?or=(from_user.eq.' + encodeURIComponent(ME) + ',to_user.eq.' + encodeURIComponent(ME) + ')');
+    var usersSet = {};
+    for (var i = 0; i < msgs.length; i++) {
+      var m = msgs[i];
+      if (m.from_user !== ME) { usersSet[m.from_user] = true; }
+      if (m.to_user !== ME) { usersSet[m.to_user] = true; }
+    }
+    var chats = Object.keys(usersSet);
+    
+    if (chats.length === 0) {
+      cp.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">💬 Нет сообщений</div>';
+      return;
+    }
+    
+    cp.innerHTML = '';
+    for (var i = 0; i < chats.length; i++) {
+      var c = chats[i];
+      var users = await api('users?login=eq.' + encodeURIComponent(c));
+      if (users.length === 0) { continue; }
+      var user = users[0];
+      
+      var div = document.createElement('div');
+      div.className = 'chatRow';
+      div.innerHTML = '<div class="chatAv">' + (user.nickname || c)[0].toUpperCase() + '</div><div><b>@' + c + '</b></div>';
+      div.onclick = (function(chatUser) {
+        return function() { openChat(chatUser); };
+      })(c);
+      cp.appendChild(div);
+    }
+  } catch (e) {
+    cp.innerHTML = '<div style="color:red;">Ошибка</div>';
+  }
 }
 
-// АДМИН
-async function loadAdmin(){
-  const ap=document.getElementById('adminPage');
-  if(!ADMIN){ap.innerHTML='<div style="padding:30px;">⛔ Нет доступа</div>';return;}
-  ap.innerHTML='<div style="padding:30px;">Загрузка...</div>';
-  const users=await api('users?select=*');const vids=await api('videos?select=*');
-  const promos=await api('promocodes?select=*');const reports=await api('reports?select=*');
-  ap.innerHTML=`<div><span class="stat"><b>${users.length}</b>Польз.</span><span class="stat"><b>${vids.length}</b>Видео</span><span class="stat"><b>${users.filter(u=>u.banned).length}</b>Банов</span><span class="stat"><b>${reports.length}</b>Жалоб</span></div>
-  <div style="background:var(--card);border-radius:16px;padding:16px;margin:15px 0;border:2px solid #ffd700;">
-    <h3>🎁 Промокод</h3><input id="promoCode" placeholder="Код"><input id="promoUploads" type="number" placeholder="Доп. загрузок" value="10"><input id="promoCoins" type="number" placeholder="Монет" value="0"><input id="promoMax" type="number" placeholder="Макс. активаций" value="100"><button class="mega-btn broadcast-btn" id="createPromoBtn">Создать</button>
-    <div id="promoList">${promos.map(p=>`<div class="row"><span>🎁 ${p.code} +${p.extra_uploads} загр · 🪙${p.coins} · ${p.used}/${p.max_uses}</span><button class="del" data-pid="${p.id}">🗑</button></div>`).join('')}</div>
-  </div>
-  <h4>👥 Пользователи</h4><div id="aUsers"></div><h4>🎬 Видео</h4><div id="aVideos"></div>`;
+async function openChat(wu) {
+  var cp = document.getElementById('chatPage');
+  cp.innerHTML = '<button id="backBtn" style="background:none;border:none;color:#ff0040;font-size:16px;cursor:pointer;margin-bottom:10px;">← Назад</button><div id="msgBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;"></div><div id="chatInput"><input id="msgInput" placeholder="Сообщение..."><button id="sendMsg">Отправить</button></div>';
   
-  document.getElementById('createPromoBtn').onclick=async()=>{
-    const c=document.getElementById('promoCode').value.trim();
-    const u=parseInt(document.getElementById('promoUploads').value)||0;
-    const m=parseInt(document.getElementById('promoCoins').value)||0;
-    const mx=parseInt(document.getElementById('promoMax').value)||100;
-    if(!c)return toast('Введите код!');
-    await api('promocodes','POST',{code:c,extra_uploads:u,coins:m,max_uses:mx,used:0,created:new Date().toISOString()});
-    toast('✅ Создан!');loadAdmin();
+  document.getElementById('backBtn').onclick = loadChats;
+  
+  var box = document.getElementById('msgBox');
+  var msgs = await api('messages?or=(from_user.eq.' + ME + ',to_user.eq.' + ME + ')&or=(from_user.eq.' + wu + ',to_user.eq.' + wu + ')&order=created.asc');
+  
+  for (var i = 0; i < msgs.length; i++) {
+    var m = msgs[i];
+    var div = document.createElement('div');
+    div.className = 'msg ' + (m.from_user === ME ? 'sent' : 'recv');
+    div.textContent = m.text;
+    box.appendChild(div);
+  }
+  box.scrollTop = box.scrollHeight;
+  
+  document.getElementById('sendMsg').onclick = async function() {
+    var t = document.getElementById('msgInput').value.trim();
+    if (!t) { return; }
+    await api('messages', 'POST', { from_user: ME, to_user: wu, text: t, created: new Date().toISOString() });
+    var div = document.createElement('div');
+    div.className = 'msg sent';
+    div.textContent = t;
+    box.appendChild(div);
+    document.getElementById('msgInput').value = '';
+    box.scrollTop = box.scrollHeight;
   };
-  document.querySelectorAll('#promoList .del').forEach(b=>b.onclick=async()=>{await api('promocodes?id=eq.'+b.dataset.pid,'DELETE');loadAdmin();});
+}
+
+// АДМИН-ПАНЕЛЬ
+async function loadAdmin() {
+  var ap = document.getElementById('adminPage');
   
-  document.getElementById('aUsers').innerHTML=users.map(u=>{
-    const w=typeof u.warnings==='string'?JSON.parse(u.warnings):(u.warnings||[]);
-    return`<div class="row"><span><b>@${u.login}</b> ${u.verified?'✓':''} 🪙${u.coins||0}</span><div>
-      <button class="ok vbtn" data-l="${u.login}">${u.verified?'Снять':'Вериф'}</button>
-      <button class="${u.banned?'ok':'ban'} bbtn" data-l="${u.login}">${u.banned?'Разбан':'Бан'}</button>
-      <button class="wbtn" data-l="${u.login}" style="background:#f59e0b;">⚠</button>
-      <button class="del dbtn" data-l="${u.login}">🗑</button></div></div>`;
-  }).join('');
+  if (!ADMIN) {
+    ap.innerHTML = '<div style="padding:30px;text-align:center;color:red;">⛔ Доступ запрещён</div>';
+    return;
+  }
   
-  document.querySelectorAll('.vbtn').forEach(b=>b.onclick=async()=>{const u=await api('users?login=eq.'+b.dataset.l);await api('users?login=eq.'+b.dataset.l,'PATCH',{verified:!u[0].verified});loadAdmin();});
-  document.querySelectorAll('.bbtn').forEach(b=>b.onclick=async()=>{const u=await api('users?login=eq.'+b.dataset.l);if(u[0].banned){await api('users?login=eq.'+b.dataset.l,'PATCH',{banned:false});}else{const r=prompt('Причина:');if(!r)return;const d=prompt('Дней:','0');if(d===null)return;await api('users?login=eq.'+b.dataset.l,'PATCH',{banned:true,ban_reason:r,ban_until:parseInt(d)>0?Date.now()+parseInt(d)*86400000:0});}loadAdmin();});
-  document.querySelectorAll('.wbtn').forEach(b=>b.onclick=async()=>{const r=prompt('Причина:');if(!r)return;const u=await api('users?login=eq.'+b.dataset.l);const w=typeof u[0].warnings==='string'?JSON.parse(u[0].warnings):(u[0].warnings||[]);w.push(r);await api('users?login=eq.'+b.dataset.l,'PATCH',{warnings:JSON.stringify(w)});loadAdmin();});
-  document.querySelectorAll('.dbtn').forEach(b=>b.onclick=async()=>{if(!confirm('Удалить @'+b.dataset.l+'?'))return;const u=await api('users?login=eq.'+b.dataset.l);await api('users?id=eq.'+u[0].id,'DELETE');loadAdmin();});
+  ap.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Загрузка...</div>';
   
-  document.getElementById('aVideos').innerHTML=vids.map(v=>`<div class="row"><span>🎬 ${v.name||''} · @${v.user_id} ${v.visibility==='private'?'🔒':''}</span><button class="del" data-vid="${v.id}">🗑</button></div>`).join('');
-  document.querySelectorAll('#aVideos .del').forEach(b=>b.onclick=async()=>{if(!confirm('Удалить?'))return;await api('videos?id=eq.'+b.dataset.vid,'DELETE');loadAdmin();});
+  try {
+    var users = await api('users?select=*');
+    var vids = await api('videos?select=*');
+    var bannedCount = 0;
+    var verifiedCount = 0;
+    
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].banned) { bannedCount++; }
+      if (users[i].verified) { verifiedCount++; }
+    }
+    
+    ap.innerHTML = '<div><span class="stat"><b>' + users.length + '</b>Польз.</span><span class="stat"><b>' + vids.length + '</b>Видео</span><span class="stat"><b>' + bannedCount + '</b>Банов</span><span class="stat"><b>' + verifiedCount + '</b>Вериф.</span></div><h4 style="margin-top:10px;">👥 Пользователи</h4><div id="aUsers"></div><h4 style="margin-top:10px;">🎬 Видео</h4><div id="aVideos"></div><div style="height:20px;"></div>';
+    
+    renderAdminUsers(users);
+    renderAdminVideos(vids);
+  } catch (e) {
+    ap.innerHTML = '<div style="color:red;">Ошибка</div>';
+  }
+}
+
+function renderAdminUsers(users) {
+  var el = document.getElementById('aUsers');
+  if (!el) { return; }
+  
+  var html = '';
+  for (var i = 0; i < users.length; i++) {
+    var u = users[i];
+    var warns = [];
+    try { warns = JSON.parse(u.warnings || '[]'); } catch(e) { warns = []; }
+    
+    var badges = '';
+    if (u.verified) { badges += ' <span style="color:#22c55e;">✓</span>'; }
+    if (u.banned) { badges += ' <span style="color:red;">БАН</span>'; }
+    if (warns.length > 0) { badges += ' <span style="color:#f59e0b;">⚠' + warns.length + '</span>'; }
+    
+    html += '<div class="row"><span><b>@' + u.login + '</b>' + badges + '</span><div>';
+    html += '<button class="ok vbtn" data-login="' + u.login + '">' + (u.verified ? 'Снять ✓' : '✓ Вериф.') + '</button>';
+    html += '<button class="' + (u.banned ? 'ok' : 'ban') + ' bbtn" data-login="' + u.login + '">' + (u.banned ? 'Разбанить' : 'Забанить') + '</button>';
+    html += '<button class="wbtn" data-login="' + u.login + '" style="background:#f59e0b;color:#000;">⚠</button>';
+    html += '<button class="del dbtn" data-login="' + u.login + '">🗑</button>';
+    html += '</div></div>';
+  }
+  el.innerHTML = html;
+  
+  // Вешаем обработчики
+  var vbtns = el.querySelectorAll('.vbtn');
+  for (var i = 0; i < vbtns.length; i++) {
+    vbtns[i].onclick = async function() {
+      var login = this.getAttribute('data-login');
+      var u = await api('users?login=eq.' + encodeURIComponent(login));
+      if (u.length > 0) {
+        await api('users?login=eq.' + encodeURIComponent(login), 'PATCH', { verified: !u[0].verified });
+        toast(u[0].verified ? '❌ Верификация снята' : '✅ Верифицирован');
+        loadAdmin();
+      }
+    };
+  }
+  
+  var bbtns = el.querySelectorAll('.bbtn');
+  for (var i = 0; i < bbtns.length; i++) {
+    bbtns[i].onclick = async function() {
+      var login = this.getAttribute('data-login');
+      var u = await api('users?login=eq.' + encodeURIComponent(login));
+      if (u.length === 0) { return; }
+      
+      if (u[0].banned) {
+        await api('users?login=eq.' + encodeURIComponent(login), 'PATCH', { banned: false, ban_reason: '', ban_until: 0 });
+        toast('🔓 Разбанен');
+      } else {
+        var reason = prompt('Причина бана:');
+        if (!reason) { return; }
+        var days = prompt('На сколько дней? (0 = навсегда)', '0');
+        if (days === null) { return; }
+        var banUntil = parseInt(days) > 0 ? Date.now() + parseInt(days) * 86400000 : 0;
+        await api('users?login=eq.' + encodeURIComponent(login), 'PATCH', { banned: true, ban_reason: reason, ban_until: banUntil });
+        toast('🚫 Забанен');
+      }
+      loadAdmin();
+    };
+  }
+  
+  var wbtns = el.querySelectorAll('.wbtn');
+  for (var i = 0; i < wbtns.length; i++) {
+    wbtns[i].onclick = async function() {
+      var login = this.getAttribute('data-login');
+      var reason = prompt('Причина предупреждения:');
+      if (!reason) { return; }
+      var u = await api('users?login=eq.' + encodeURIComponent(login));
+      if (u.length === 0) { return; }
+      var warns = [];
+      try { warns = JSON.parse(u[0].warnings || '[]'); } catch(e) { warns = []; }
+      warns.push(reason);
+      await api('users?login=eq.' + encodeURIComponent(login), 'PATCH', { warnings: JSON.stringify(warns) });
+      toast('⚠️ Предупреждение выдано');
+      loadAdmin();
+    };
+  }
+  
+  var dbtns = el.querySelectorAll('.dbtn');
+  for (var i = 0; i < dbtns.length; i++) {
+    dbtns[i].onclick = async function() {
+      var login = this.getAttribute('data-login');
+      if (!confirm('Удалить пользователя @' + login + '?')) { return; }
+      var u = await api('users?login=eq.' + encodeURIComponent(login));
+      if (u.length > 0) {
+        await api('users?id=eq.' + u[0].id, 'DELETE');
+        toast('🗑️ Пользователь удалён');
+        loadAdmin();
+      }
+    };
+  }
+}
+
+function renderAdminVideos(vids) {
+  var el = document.getElementById('aVideos');
+  if (!el) { return; }
+  
+  var html = '';
+  for (var i = 0; i < vids.length; i++) {
+    var v = vids[i];
+    html += '<div class="row"><span>🎬 ' + (v.name || 'Без названия') + ' · @' + v.user_id + ' ' + (v.visibility === 'private' ? '🔒' : '') + '</span><button class="del" data-vid="' + v.id + '">🗑</button></div>';
+  }
+  el.innerHTML = html;
+  
+  var btns = el.querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].onclick = async function() {
+      var vid = this.getAttribute('data-vid');
+      if (!confirm('Удалить видео?')) { return; }
+      await api('videos?id=eq.' + vid, 'DELETE');
+      toast('🗑️ Видео удалено');
+      loadAdmin();
+    };
+  }
 }
 
 // ЗАПУСК
-(async()=>{
-  await ensureAdmin();
-  const sv=localStorage.getItem('tiktok_user');
-  if(sv){try{const u=await api('users?login=eq.'+encodeURIComponent(sv));if(u.length&&!u[0].banned)enter(u[0]);else localStorage.removeItem('tiktok_user');}catch(e){localStorage.removeItem('tiktok_user');}}
-})();
+createAdmin().then(function() {
+  var saved = localStorage.getItem('tiktok_user');
+  if (saved) {
+    api('users?login=eq.' + encodeURIComponent(saved)).then(function(users) {
+      if (users.length > 0 && !users[0].banned) {
+        enter(users[0]);
+      } else {
+        localStorage.removeItem('tiktok_user');
+      }
+    }).catch(function() {
+      localStorage.removeItem('tiktok_user');
+    });
+  }
+});
 </script>
 </body>
 </html>
